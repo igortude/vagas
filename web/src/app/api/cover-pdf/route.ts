@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
   // company that is all punctuation ("!!!") slugs to nothing, which is a bad
   // request rather than a miss. resolveTailoredCover returns null for both, so
   // the distinction has to be drawn here to keep the 400.
-  if (!application && !companySlug(company)) return new Response("company required", { status: 400 });
+  if (!application && !companySlug(company)) return new Response("Informe a empresa", { status: 400 });
 
   const file = await resolveTailoredCover(company, application);
   if (!file) return new Response("no tailored cover letter found for this offer", { status: 404 });

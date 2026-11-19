@@ -10,6 +10,24 @@ import { saveStatus } from "@/lib/pipeline-status.mjs";
 // Status writeback control. Updates the existing tracker row (status cell) via
 // /api/status — never adds rows. Reverts on failure; confirms with the
 // terminal-popup animation.
+const STATUS_LABELS: Record<string, string> = {
+  Evaluated: "Avaliada",
+  Applied: "Enviada",
+  Responded: "Respondida",
+  Assessment: "Teste",
+  Interview: "Entrevista",
+  Offer: "Proposta",
+  Hired: "Contratada",
+  Rejected: "Rejeitada",
+  Discarded: "Descartada",
+  SKIP: "Ignorar",
+};
+
+// Display labels only: canonical values must still reach /api/status unchanged.
+export function statusLabelPtBr(status: string): string {
+  return STATUS_LABELS[status] ?? status;
+}
+
 type StatusSelectProps = {
   n: string;
   current: string;
@@ -35,7 +53,7 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
   const select = useRef<HTMLSelectElement>(null);
   const router = useRouter();
   const id = useId();
-  const label = applicationLabel ?? `application #${n}`;
+  const label = applicationLabel ?? `candidatura nº ${n}`;
 
   useEffect(() => {
     if (!saving.current) setStatus(current);
@@ -93,7 +111,7 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
     } catch (cause) {
       if (!mounted.current) return;
       setStatus(prev); // revert on failure
-      setError(cause instanceof Error ? cause.message : "Could not save status. Please try again.");
+      setError(cause instanceof Error ? cause.message : "Não foi possível salvar o status. Tente novamente.");
     } finally {
       saving.current = false;
       if (mounted.current) setBusy(false);
@@ -107,7 +125,7 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
     <select
       ref={select}
       id={id}
-      aria-label={inline ? `Status for ${label}` : undefined}
+      aria-label={inline ? `Status de ${label}` : undefined}
       aria-invalid={error ? true : undefined}
       aria-describedby={error ? `${id}-error` : undefined}
       value={shown}
@@ -121,8 +139,8 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
       disabled={busy}
       className="rounded-md border border-border bg-surface px-2.5 py-1 text-sm text-foreground outline-none transition-colors focus:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/40 disabled:opacity-50 max-sm:min-h-[44px]"
     >
-      {!known && <option value={shown}>{shown}</option>}
-      {CANONICAL_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+      {!known && <option value={shown}>{statusLabelPtBr(shown)}</option>}
+      {CANONICAL_STATES.map((s) => <option key={s} value={s}>{statusLabelPtBr(s)}</option>)}
     </select>
   );
   return (
@@ -130,7 +148,7 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
       {inline ? editing ? (
         <>
           {control}
-          <button type="button" aria-label={`Cancel editing status for ${label}`} title="Cancel" onClick={cancel} disabled={busy} className={buttonClass}>
+          <button type="button" aria-label={`Cancelar edição do status de ${label}`} title="Cancelar" onClick={cancel} disabled={busy} className={buttonClass}>
             <X aria-hidden="true" className="size-3.5" />
           </button>
         </>
@@ -138,9 +156,9 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
         <>
           <span className="inline-flex items-center gap-1.5">
             <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", statusDot(shown))} />
-            {shown}
+            {statusLabelPtBr(shown)}
           </span>
-          <button ref={pencil} type="button" aria-label={`Edit status for ${label}`} title="Edit status" onClick={() => { setError(""); setEditing(true); }} className={buttonClass}>
+          <button ref={pencil} type="button" aria-label={`Editar status de ${label}`} title="Editar status" onClick={() => { setError(""); setEditing(true); }} className={buttonClass}>
             <Pencil aria-hidden="true" className="size-4" />
           </button>
         </>
@@ -150,10 +168,10 @@ function StatusEditor({ n, current, inline = false, applicationLabel, onSaved }:
           {control}
         </>
       )}
-      {busy && <span role="status" className="text-xs text-faint">saving…</span>}
+      {busy && <span role="status" className="text-xs text-faint">salvando…</span>}
       {saved && (
         <span role="status" className="animate-terminal-popup inline-flex items-center gap-1 text-xs font-medium text-brand-text">
-          <Check aria-hidden="true" className="size-3" /> saved
+          <Check aria-hidden="true" className="size-3" /> salvo
         </span>
       )}
       {error && <span id={`${id}-error`} role="alert" className="basis-full whitespace-normal text-xs text-red-600">{error}</span>}

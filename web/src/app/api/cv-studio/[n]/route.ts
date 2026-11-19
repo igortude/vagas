@@ -23,7 +23,7 @@ export async function GET(_req: Request, { params }: RouteContext) {
 // tab left open across a regeneration cannot write edits for the old CV.
 export async function PUT(req: Request, { params }: RouteContext) {
   const body = await readJsonObject<{ edits?: unknown }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   const load = await loadStudio((await params).n);
   if (!load.ok) return NextResponse.json({ error: load.reason }, { status: NOT_FOUND[load.reason] });
   const parsed = parseEdits(body.edits, load.doc.sourceHash);
@@ -36,7 +36,7 @@ export async function PUT(req: Request, { params }: RouteContext) {
 export async function POST(req: Request, { params }: RouteContext) {
   const n = (await params).n;
   const body = await readJsonObject<{ op?: string; edits?: unknown; text?: unknown }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   if (body.op === "keywords") {
     if (typeof body.text !== "string" || body.text.length > 2000) return NextResponse.json({ error: "text required" }, { status: 400 });
     const keywords = await keywordsInText(n, body.text);

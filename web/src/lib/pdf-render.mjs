@@ -84,7 +84,7 @@ export function writeCvHtml({ pdfPaths, html }) {
     // err.path when the platform gives it: a non-fs throw (an oversized-content
     // RangeError, a bad argument type) carries none, and "could not save to
     // undefined" tells the user nothing.
-    return { ok: false, error: `Could not save the tailored CV to ${err.path ?? pdfPaths.html}: ${err.message}` };
+    return { ok: false, error: `Não foi possível salvar o currículo adaptado em ${err.path ?? pdfPaths.html}: ${err.message}` };
   }
 }
 

@@ -8,7 +8,7 @@ import type { Application, InboxJob } from "@/lib/career-ops";
 import { Badge } from "@/components/ui/badge";
 import { CompanyLogo } from "@/components/company-logo";
 import { CANONICAL_STATES, scoreNum, scoreTone } from "@/lib/format";
-import { StatusSelect } from "@/components/status-select";
+import { StatusSelect, statusLabelPtBr } from "@/components/status-select";
 import { applicationKey, applySavedStatus, saveStatuses } from "@/lib/pipeline-status.mjs";
 import { InboxTriage } from "@/components/inbox/inbox-triage";
 import { cn } from "@/lib/cn";
@@ -27,6 +27,16 @@ type Tab = (typeof PIPELINE_TABS)[number];
 
 const SORT_KEYS = ["tracker", "company", "role", "score", "status", "date"] as const;
 type SortKey = (typeof SORT_KEYS)[number];
+
+const TAB_LABELS: Record<string, string> = {
+  INBOX: "Caixa de entrada",
+  ALL: "Todas",
+  OTHER: "Outras",
+};
+
+function tabLabel(tab: string): string {
+  return TAB_LABELS[tab] ?? statusLabelPtBr(tab.charAt(0) + tab.slice(1).toLowerCase());
+}
 
 export function PipelineView({
   applications,
@@ -164,9 +174,9 @@ export function PipelineView({
     setBulkBusy(false);
     setSelected(new Set(selectedRows.filter((r) => failed.some((f) => f.n === r.n)).map(applicationKey)));
     if (failed.length > 0) {
-      setBulkError(`${failed.length} not saved: ${failed.map((f) => `#${f.n} (${f.error})`).join(", ")}`);
+      setBulkError(`${failed.length} não salvas: ${failed.map((f) => `#${f.n} (${f.error})`).join(", ")}`);
     }
-    setAnnouncement(`${saved.length} application${saved.length === 1 ? "" : "s"} set to ${bulkStatus}.`);
+    setAnnouncement(`${saved.length} candidatura${saved.length === 1 ? "" : "s"} definida${saved.length === 1 ? "" : "s"} como ${statusLabelPtBr(bulkStatus)}.`);
     startTransition(() => router.refresh());
   }
 
@@ -176,8 +186,8 @@ export function PipelineView({
         <div>
           <h1 className="font-display text-2xl tracking-tight text-landing">Pipeline</h1>
           <p className="mt-1 text-sm text-muted">
-            <span className="tabular-nums">{inboxCount}</span> in inbox ·{" "}
-            <span className="tabular-nums">{visibleApplications.length}</span> tracked
+            <span className="tabular-nums">{inboxCount}</span> na caixa de entrada ·{" "}
+            <span className="tabular-nums">{visibleApplications.length}</span> acompanhadas
           </p>
         </div>
         {/* the tracker has its own search; the inbox brings its own facet filters */}
@@ -188,7 +198,7 @@ export function PipelineView({
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search company or role…"
+                placeholder="Buscar empresa ou cargo…"
                 className="w-full rounded-md border border-border bg-surface/60 py-2 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-faint focus:border-brand/50 focus-visible:ring-2 focus-visible:ring-brand/40"
               />
             </div>
@@ -196,11 +206,11 @@ export function PipelineView({
               type="button"
               onClick={downloadCsv}
               disabled={isPending || filtered.length === 0}
-              title={`Download the ${filtered.length} row${filtered.length === 1 ? "" : "s"} shown as a CSV file`}
+              title={`Baixar as ${filtered.length} linha${filtered.length === 1 ? "" : "s"} exibidas como arquivo CSV`}
               className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-md border border-border bg-surface/60 px-3 py-2 text-sm text-muted transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-brand/40 disabled:cursor-not-allowed disabled:opacity-50 max-sm:min-h-[44px] max-sm:min-w-[44px] max-sm:justify-center max-sm:px-0"
             >
               <Download aria-hidden="true" className="size-4" />
-              <span className="max-sm:sr-only">Download CSV</span>
+              <span className="max-sm:sr-only">Baixar CSV</span>
             </button>
           </div>
         )}
@@ -232,7 +242,7 @@ export function PipelineView({
                   : "border-transparent text-muted hover:text-foreground",
               )}
             >
-              {t} <span className="text-faint tabular-nums">{count}</span>
+              {tabLabel(t)} <span className="text-faint tabular-nums">{count}</span>
             </button>
           );
         })}
@@ -242,14 +252,14 @@ export function PipelineView({
 
       {visibleTab !== "INBOX" && minFilter != null && (
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs text-faint">Filtered:</span>
+          <span className="text-xs text-faint">Filtrado:</span>
           <button
             type="button"
             onClick={() => setParams({ min: null })}
             className="inline-flex items-center gap-1.5 rounded-full border border-brand/40 bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand-text transition-colors hover:bg-brand/15"
-            title="Clear score filter"
+            title="Limpar filtro de nota"
           >
-            score ≥ {minFilter.toFixed(1)}
+            nota ≥ {minFilter.toFixed(1)}
             <X className="size-3" />
           </button>
         </div>
@@ -257,17 +267,17 @@ export function PipelineView({
 
       {visibleTab !== "INBOX" && selectedRows.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface/60 px-3 py-2 text-sm">
-          <span className="tabular-nums">{selectedRows.length} selected</span>
+          <span className="tabular-nums">{selectedRows.length} selecionada{selectedRows.length === 1 ? "" : "s"}</span>
           <select
-            aria-label="Status for selected applications"
+            aria-label="Status das candidaturas selecionadas"
             value={bulkStatus}
             onChange={(e) => setBulkStatus(e.target.value)}
             disabled={bulkBusy}
             className="rounded-md border border-border bg-surface px-2 py-1 text-sm"
           >
-            <option value="">Set status…</option>
+            <option value="">Definir status…</option>
             {CANONICAL_STATES.map((s) => (
-              <option key={s} value={s}>{s}</option>
+              <option key={s} value={s}>{statusLabelPtBr(s)}</option>
             ))}
           </select>
           <button
@@ -276,18 +286,18 @@ export function PipelineView({
             disabled={!bulkStatus || bulkBusy}
             className="rounded-md border border-brand/40 bg-brand-soft px-2.5 py-1 text-xs font-medium text-brand-text disabled:opacity-50"
           >
-            {bulkBusy ? "Saving…" : "Apply"}
+            {bulkBusy ? "Salvando…" : "Aplicar"}
           </button>
           {selectedRows.length >= 2 && selectedRows.length <= COMPARE_MAX && (
             <Link
               href={`/pipeline/compare?n=${selectedRows.map((r) => r.n).join(",")}`}
               className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:border-brand/40 hover:text-brand-text"
             >
-              Compare
+              Comparar
             </Link>
           )}
           <button type="button" onClick={() => setSelected(new Set())} className="text-xs text-muted hover:text-foreground">
-            Clear
+            Limpar
           </button>
           {bulkError && <span role="alert" className="text-xs text-red-500">{bulkError}</span>}
         </div>
@@ -298,7 +308,7 @@ export function PipelineView({
         <>
           {inbox === null ? (
             <div role="status" className="mt-4 overflow-x-auto rounded-2xl border border-border">
-              <span className="sr-only">Loading inbox…</span>
+              <span className="sr-only">Carregando caixa de entrada…</span>
               <table aria-hidden="true" className="w-full min-w-[44rem] text-sm">
                 <tbody className="divide-y divide-border">
                   <PipelineTableRowsSkeleton />
@@ -325,7 +335,7 @@ export function PipelineView({
                 <th className="w-8 px-3 py-2.5">
                   <input
                     type="checkbox"
-                    aria-label="Select all shown applications"
+                    aria-label="Selecionar todas as candidaturas exibidas"
                     checked={allSelected}
                     onChange={() => setSelected(allSelected ? new Set() : new Set(filteredKeys))}
                   />
@@ -344,7 +354,7 @@ export function PipelineView({
                       className="inline-flex cursor-pointer select-none items-center gap-1 uppercase tracking-wide hover:text-foreground"
                       onClick={() => setParams({ sort: k, dir: sort.key === k ? sort.dir * -1 : -1 })}
                     >
-                      {k}
+                      {k === "tracker" ? "nº" : k === "company" ? "empresa" : k === "role" ? "cargo" : k === "score" ? "nota" : k === "status" ? "status" : "data"}
                       <ChevronsUpDown aria-hidden="true" className="size-3" />
                     </button>
                   </th>
@@ -364,7 +374,7 @@ export function PipelineView({
                     <td className="w-8 px-3 py-3">
                       <input
                         type="checkbox"
-                        aria-label={`Select ${company.label}, ${r.role} (#${r.n})`}
+                        aria-label={`Selecionar ${company.label}, ${r.role} (#${r.n})`}
                         checked={selected.has(key)}
                         onChange={() => toggleRow(key)}
                       />
@@ -413,7 +423,7 @@ export function PipelineView({
                         if (tab !== "ALL" && !rowOnPipelineTab(status, tab) && (restoreFocus || focusedRow?.dataset.applicationKey === key)) {
                           activeTab.current?.focus();
                         }
-                        setAnnouncement(`Application #${r.n} status saved as ${status}.`);
+                        setAnnouncement(`Status da candidatura #${r.n} salvo como ${statusLabelPtBr(status)}.`);
                         startTransition(() => {
                           showSavedStatus({ key, status });
                           router.refresh();
@@ -472,30 +482,30 @@ function InboxEmpty({ tracked }: { tracked: number }) {
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
         <span className="size-2.5 rounded-full bg-foreground/15" aria-hidden="true" />
-        <span className="ml-3 font-mono text-xs tracking-wide text-muted">career-ops · inbox</span>
+        <span className="ml-3 font-mono text-xs tracking-wide text-muted">career-ops · caixa de entrada</span>
       </div>
       <div className="px-6 py-10 text-center">
         <p className="font-display text-lg">
-          Your <span className="text-brand-text">inbox</span> is empty.
+          Sua <span className="text-brand-text">caixa de entrada</span> está vazia.
         </p>
         {tracked > 0 && (
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
-            New postings land here. Your{" "}
+            Novas vagas chegam aqui. Suas{" "}
             <Link href="/pipeline?tab=ALL" className="font-medium text-brand-text underline-offset-2 hover:underline">
-              {tracked} tracked role{tracked === 1 ? "" : "s"}
+              {tracked} vaga{tracked === 1 ? "" : "s"} acompanhada{tracked === 1 ? "" : "s"}
             </Link>{" "}
-            {tracked === 1 ? "is" : "are"} under All.
+            {tracked === 1 ? "está" : "estão"} em Todas.
           </p>
         )}
-        <p className="mx-auto mt-2 max-w-sm text-sm text-muted">Find roles that match your CV — free, no tokens spent.</p>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-muted">Encontre vagas que combinam com seu currículo — grátis, sem gastar tokens.</p>
         <Link
           href="/explore?run=1"
           className="mt-5 inline-flex items-center gap-2 rounded-full bg-brand px-5 py-2.5 text-sm font-medium text-brand-foreground shadow-sm transition-all duration-200 hover:bg-brand-200 hover:-translate-y-0.5 hover:shadow-md"
         >
-          <Compass className="size-4" /> {tracked > 0 ? "Run a free scan" : "Run your first free scan"} <ArrowRight className="size-4" />
+          <Compass className="size-4" /> {tracked > 0 ? "Rodar uma varredura grátis" : "Rodar sua primeira varredura grátis"} <ArrowRight className="size-4" />
         </Link>
         <p className="mx-auto mt-4 max-w-sm text-xs text-muted">
-          Prefer the terminal? Run <code className="rounded bg-surface-hover px-1 py-0.5 font-mono">career-ops scan</code>, or add job URLs to{" "}
+          Prefere o terminal? Rode <code className="rounded bg-surface-hover px-1 py-0.5 font-mono">career-ops scan</code>, ou adicione URLs de vagas em{" "}
           <code className="rounded bg-surface-hover px-1 py-0.5 font-mono">data/pipeline.md</code>.
         </p>
       </div>

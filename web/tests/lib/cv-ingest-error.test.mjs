@@ -13,7 +13,7 @@ test("a refused upload shows the server's reason, not a generic parse failure (#
 test("a non-JSON error body falls back to a message naming the status", async () => {
   const msg = await ingestErrorMessage(new Response("<html>boom</html>", { status: 500 }));
   assert.match(msg, /500/);
-  assert.match(msg, /paste/i);
+  assert.match(msg, /cole o texto/i);
 });
 
 test("an error body without a usable `error` string also falls back", async () => {
@@ -23,9 +23,9 @@ test("an error body without a usable `error` string also falls back", async () =
   }
 });
 
-test("404 keeps pointing at Config (no CLI connected)", async () => {
+test("404 explains the missing local ingest endpoint", async () => {
   const msg = await ingestErrorMessage(json({ error: "whatever the route says" }, 404));
-  assert.equal(msg, "Connect an AI CLI in Config first — it parses your CV locally.");
+  assert.equal(msg, "A leitura local do currículo não está disponível. Atualize a página ou revise o texto sem IA.");
 });
 
 test("an OK response is not an error, and its stream is left unread", async () => {

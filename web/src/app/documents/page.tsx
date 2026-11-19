@@ -6,6 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, FileText, File, Calendar, Loader2 } from "lucide-react";
 
+function formatDocumentDate(date: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date)
+    ? `${date.slice(8, 10)}/${date.slice(5, 7)}/${date.slice(0, 4)}`
+    : date;
+}
+
 type DocumentItem = {
   id: string;
   filename: string;
@@ -24,7 +30,7 @@ export default function DocumentsPage() {
   useEffect(() => {
     fetch("/api/documents")
       .then((res) => {
-        if (!res.ok) throw new Error("Failed to load documents");
+        if (!res.ok) throw new Error("Não foi possível carregar os documentos");
         return res.json();
       })
       .then((data) => {
@@ -32,7 +38,7 @@ export default function DocumentsPage() {
         setError(null);
       })
       .catch((err) => {
-        setError(err.message || "Something went wrong");
+        setError(err.message || "Ocorreu um erro");
       })
       .finally(() => {
         setLoading(false);
@@ -53,14 +59,14 @@ export default function DocumentsPage() {
         <div className="mb-4 rounded-full bg-red-500/10 p-3 text-red-500">
           <File className="h-6 w-6" />
         </div>
-        <h2 className="text-lg font-medium text-foreground">Failed to load</h2>
+        <h2 className="text-lg font-medium text-foreground">Falha ao carregar</h2>
         <p className="mt-1 text-sm text-muted">{error}</p>
         <Button
           variant="outline"
           className="mt-4"
           onClick={() => window.location.reload()}
         >
-          Try again
+          Tentar novamente
         </Button>
       </div>
     );
@@ -72,9 +78,9 @@ export default function DocumentsPage() {
         <div className="mb-4 rounded-full bg-surface-hover p-3 text-muted">
           <FileText className="h-6 w-6" />
         </div>
-        <h2 className="text-lg font-medium text-foreground">No documents found</h2>
+        <h2 className="text-lg font-medium text-foreground">Nenhum documento encontrado</h2>
         <p className="mt-1 text-sm text-muted">
-          Generated CVs and cover letters will appear here.
+          Currículos e cartas de apresentação gerados aparecerão aqui.
         </p>
       </div>
     );
@@ -84,10 +90,10 @@ export default function DocumentsPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-          Documents
+          Documentos
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Browse your generated CVs and cover letters.
+          Consulte seus currículos e cartas de apresentação gerados.
         </p>
       </div>
 
@@ -114,12 +120,12 @@ export default function DocumentsPage() {
               
               <div className="mt-4 flex flex-wrap gap-2">
                 <Badge tone="info" className="capitalize">
-                  {doc.kind === "cv" ? "CV" : doc.kind === "cover" ? "Cover Letter" : "Document"}
+                  {doc.kind === "cv" ? "CV" : doc.kind === "cover" ? "Carta de apresentação" : "Documento"}
                 </Badge>
                 {doc.date && (
                   <Badge tone="muted" className="flex items-center gap-1 font-normal">
                     <Calendar className="h-3 w-3" />
-                    {doc.date}
+                    {formatDocumentDate(doc.date)}
                   </Badge>
                 )}
                 {doc.format && (
@@ -136,7 +142,7 @@ export default function DocumentsPage() {
                 className="w-full justify-between"
                 onClick={() => window.open(`/api/documents?id=${doc.id}`, "_blank")}
               >
-                Open PDF
+                Abrir PDF
                 <ExternalLink className="h-4 w-4 text-muted" />
               </Button>
             </div>

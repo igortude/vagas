@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { CANONICAL_STATES } from "@/lib/format";
+import { statusLabelPtBr } from "@/components/status-select";
 import { cn } from "@/lib/cn";
 
 /**
@@ -42,7 +43,7 @@ export function FollowupStatusSelect({
         body: JSON.stringify({ n: String(n), status: next }),
       });
       const result = (await response.json().catch(() => ({}))) as { error?: string; status?: string };
-      if (!response.ok) throw new Error(result.error || "Status update failed.");
+      if (!response.ok) throw new Error(result.error || "Falha ao atualizar o status.");
 
       setStatus(result.status || next);
       setSaved(true);
@@ -50,7 +51,7 @@ export function FollowupStatusSelect({
       onSaved();
     } catch (cause) {
       setStatus(previous);
-      setError(cause instanceof Error ? cause.message : "Status update failed.");
+      setError(cause instanceof Error ? cause.message : "Falha ao atualizar o status.");
     } finally {
       setBusy(false);
     }
@@ -59,8 +60,8 @@ export function FollowupStatusSelect({
   return (
     <span className="inline-flex max-w-full flex-wrap items-center gap-1.5">
       <select
-        aria-label={`Update status for application #${n}`}
-        title="Change status — urgency recalculates from the new status and follow-up history"
+        aria-label={`Atualizar status da candidatura nº ${n}`}
+        title="Mudar status — a urgência é recalculada a partir do novo status e do histórico de acompanhamentos"
         value={status}
         onChange={onChange}
         disabled={busy}
@@ -69,16 +70,16 @@ export function FollowupStatusSelect({
           error && "border-red-500/60",
         )}
       >
-        {!CANONICAL_STATES.some((state) => state.toLowerCase() === status.toLowerCase()) && <option value={status}>{status}</option>}
+        {!CANONICAL_STATES.some((state) => state.toLowerCase() === status.toLowerCase()) && <option value={status}>{statusLabelPtBr(status)}</option>}
         {CANONICAL_STATES.map((state) => (
           <option key={state} value={state}>
-            {state}
+            {statusLabelPtBr(state)}
           </option>
         ))}
       </select>
       <span role="status" aria-live="polite" aria-atomic="true" className="inline-flex min-h-3.5 items-center">
-        {busy && <><Loader2 aria-hidden="true" className="size-3.5 animate-spin text-faint" /><span className="sr-only">Saving status</span></>}
-        {saved && <><Check aria-hidden="true" className="size-3.5 text-brand-text" /><span className="sr-only">Status saved</span></>}
+        {busy && <><Loader2 aria-hidden="true" className="size-3.5 animate-spin text-faint" /><span className="sr-only">Salvando status</span></>}
+        {saved && <><Check aria-hidden="true" className="size-3.5 text-brand-text" /><span className="sr-only">Status salvo</span></>}
       </span>
       {error && <span role="alert" className="basis-full text-xs text-red-400">{error}</span>}
     </span>

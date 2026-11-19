@@ -289,7 +289,7 @@ export async function persistEvaluation({ spawnFn, execPath, root, markdown, url
     }),
   });
   if (!written.ok) {
-    return finish(written.stderr || "Could not save the evaluation report: persist-evaluation-report.mjs failed.");
+    return finish(written.stderr || "Não foi possível salvar o relatório de avaliação: o persist-evaluation-report.mjs falhou.");
   }
 
   const merged = await spawnScript({

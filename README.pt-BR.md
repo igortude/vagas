@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+> **Este é o _vagas_, um fork independente e não oficial do [career-ops](https://github.com/career-ops-hq/career-ops)**, criado por [Santiago Fernández de Valderrama](https://santifer.io) ([@santifer](https://github.com/santifer)).
+> Este fork traduz o projeto para português (Brasil) e permite usar **modelos de IA locais** instalados na máquina do usuário.
+> Ele **não é afiliado nem endossado** pelo projeto original ou por seu autor. O código segue sob a [Licença MIT](LICENSE), com o copyright original mantido. "career-ops"™ é marca do autor original ([TRADEMARK.md](TRADEMARK.md)). Detalhes em [NOTICE.md](NOTICE.md).
+> Repositório do fork: https://github.com/igortude/vagas · Bugs deste fork: abra issues **aqui**, não no projeto original.
+
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/wordmark-dark.svg"><img src="docs/wordmark-light.svg" alt="career-ops" width="250" height="56"></picture></p>
 
 <p align="center">O agente de IA open source para buscar emprego.</p>

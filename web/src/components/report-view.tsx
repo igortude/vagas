@@ -36,6 +36,18 @@ import { PageFrame } from "@/components/page-frame";
 // Block B (CV Match) stays open; everything else, including Role Summary and
 // STAR+R, is collapsed (#4205). Machine artifacts stay in the Technical tier.
 
+// Display-only labels for applyLineLabel()'s canonical English values, which the
+// score/legitimacy logic compares by string.
+const APPLY_LINE_LABELS: Record<string, string> = {
+  Recommended: "Recomendada",
+  "Check the posting first": "Confira a vaga primeiro",
+  "Below the apply line": "Abaixo da linha de candidatura",
+};
+
+function applyLineText(label: string | null | undefined): string {
+  return label ? (APPLY_LINE_LABELS[label] ?? label) : "";
+}
+
 function isMachine(heading: string): boolean {
   return /machine summary|submitted|submit[-\s]?log/i.test(heading);
 }
@@ -99,9 +111,9 @@ export function ReportView({
       <header className="mt-5">
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">#{id}</p>
         <div className="mt-2 flex items-center gap-3">
-          <CompanyLogo name={company?.logoName ?? meta?.title ?? `Report #${id}`} size={40} />
+          <CompanyLogo name={company?.logoName ?? meta?.title ?? `Relatório nº ${id}`} size={40} />
           <h1 className="font-display text-3xl tracking-tight text-landing">
-            {company?.label ?? meta?.title ?? `Report #${id}`}
+            {company?.label ?? meta?.title ?? `Relatório nº ${id}`}
           </h1>
         </div>
         {app?.role && <p className="mt-1 text-muted">{app.role}</p>}
@@ -118,7 +130,7 @@ export function ReportView({
               href={applyHref}
               className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors hover:border-brand/40 hover:text-brand-text max-sm:min-h-[44px]"
             >
-              Apply checklist
+              Checklist de candidatura
             </Link>
           )}
           <MarkPdfReadyButton reportNum={reportNum} ready={pdfReady} />
@@ -129,7 +141,7 @@ export function ReportView({
               rel="noreferrer"
               className="inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/15 dark:text-emerald-400 max-sm:min-h-[44px]"
             >
-              <FileText className="size-3.5" /> View cover
+              <FileText className="size-3.5" /> Ver carta
             </a>
           )}
         </div>
@@ -151,7 +163,7 @@ export function ReportView({
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-1 text-brand-text hover:underline max-sm:min-h-[44px]"
               >
-                posting <ExternalLink className="size-3" />
+                vaga <ExternalLink className="size-3" />
               </a>
             )}
           </div>
@@ -176,18 +188,18 @@ export function ReportView({
               : "border-border bg-surface/50";
             const callout = (
               <div className={`rounded-2xl border px-5 py-5 ${verdictClass}`}>
-                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Verdict</p>
+                <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">Veredito</p>
                 <div className="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
                   {score ? (
                     <p className="font-display text-4xl tabular-nums tracking-tight text-landing">{score}</p>
                   ) : (
-                    <p className="text-sm text-muted">No score on this report.</p>
+                    <p className="text-sm text-muted">Sem nota neste relatório.</p>
                   )}
-                  <p className="pb-1 text-xs text-muted">Apply line is {APPLY_LINE.toFixed(1)}</p>
+                  <p className="pb-1 text-xs text-muted">Linha de candidatura: {APPLY_LINE.toFixed(1).replace(".", ",")}</p>
                 </div>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {score && <Badge tone={scoreTone(score)}>{score}</Badge>}
-                  {line && <Badge tone={recommended ? "good" : line === "Below the apply line" ? "muted" : "warn"}>{line}</Badge>}
+                  {line && <Badge tone={recommended ? "good" : line === "Below the apply line" ? "muted" : "warn"}>{applyLineText(line)}</Badge>}
                   {decision && <Badge tone="info">{decision}</Badge>}
                   {meta?.legitimacy && <Badge tone={legitimacyTone(meta.legitimacy)}>{meta.legitimacy}</Badge>}
                 </div>
@@ -248,7 +260,7 @@ export function ReportView({
                   <>
                     <div className="mt-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.14em] text-faint">
                       <span className="h-px flex-1 bg-border" />
-                      Technical details · for developers
+                      Detalhes técnicos · para desenvolvedores
                       <span className="h-px flex-1 bg-border" />
                     </div>
                     {machine.map((s, i) => (
@@ -281,7 +293,7 @@ export function ReportView({
       ) : (
         <div className="mt-8 flex items-center gap-3 rounded-2xl border border-dashed border-border bg-surface/30 p-5 text-sm text-muted">
           <FileText className="size-5 shrink-0 text-faint" />
-          No report file found for #{id} in <code className="text-foreground">reports/</code>.
+          Nenhum arquivo de relatório encontrado para #{id} em <code className="text-foreground">reports/</code>.
         </div>
       )}
     </PageFrame>

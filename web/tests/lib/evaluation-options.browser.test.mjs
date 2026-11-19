@@ -42,7 +42,7 @@ test("evaluation choices survive navigation and reach pasted-URL and shortlist w
   await scoreQuick("https://example.com/fixture-full");
   assert.deepEqual(requests.at(-1).evaluationSections, [...FULL_EVALUATION]);
   await options.getByRole("button", { name: "Essentials", exact: true }).click();
-  await options.getByRole("checkbox", { name: /Job summary/ }).uncheck();
+  await options.getByRole("checkbox", { name: /Resumo da vaga/ }).uncheck();
   await scoreQuick("https://example.com/fixture-fit-only");
   assert.deepEqual(requests.at(-1).evaluationSections, []);
   await options.getByRole("checkbox", { name: /Interview preparation/ }).check();

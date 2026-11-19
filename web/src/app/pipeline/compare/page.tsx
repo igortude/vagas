@@ -9,6 +9,13 @@ import { PageFrame } from "@/components/page-frame";
 
 export const dynamic = "force-dynamic";
 
+const FIELD_LABELS: Record<string, string> = { Date: "Data", Archetype: "Arquétipo", Status: "Status" };
+const STATUS_LABELS: Record<string, string> = {
+  Evaluated: "Avaliada", Applied: "Enviada", Responded: "Respondida", Assessment: "Teste",
+  Interview: "Entrevista", Offer: "Proposta", Hired: "Contratada", Rejected: "Rejeitada",
+  Discarded: "Descartada", SKIP: "Ignorar",
+};
+
 type Column = {
   n: string;
   company: string;
@@ -49,9 +56,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
       <Link href="/pipeline?tab=all" className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-brand-text">
         <ArrowLeft className="size-4" /> Pipeline
       </Link>
-      <h1 className="mt-5 font-display text-2xl tracking-tight text-landing">Compare</h1>
+      <h1 className="mt-5 font-display text-2xl tracking-tight text-landing">Comparar</h1>
       {columns.length < 2 ? (
-        <p className="mt-4 text-sm text-muted">Select two or three applications in the Pipeline to compare them.</p>
+        <p className="mt-4 text-sm text-muted">Selecione duas ou três candidaturas no pipeline para compará-las.</p>
       ) : (
         <div className="mt-6 overflow-x-auto rounded-2xl border border-border">
           <table className="w-full min-w-[40rem] table-fixed text-sm">
@@ -71,7 +78,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
             </thead>
             <tbody className="divide-y divide-border align-top">
               <tr>
-                <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">Score</th>
+                <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">Nota</th>
                 {columns.map((c) => (
                   <td key={c.n} className="px-4 py-2.5">
                     {c.score && <Badge tone={scoreTone(c.score)}>{c.score}</Badge>}
@@ -79,7 +86,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                 ))}
               </tr>
               <tr>
-                <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">Legitimacy</th>
+                <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">Legitimidade</th>
                 {columns.map((c) => (
                   <td key={c.n} className="px-4 py-2.5">
                     {c.legitimacy && <Badge tone={legitimacyTone(c.legitimacy)}>{c.legitimacy}</Badge>}
@@ -88,9 +95,9 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
               </tr>
               {labels.map((label) => (
                 <tr key={label}>
-                  <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">{label}</th>
+                  <th scope="row" className="px-4 py-2.5 text-left text-xs font-medium text-faint">{FIELD_LABELS[label] ?? label}</th>
                   {columns.map((c) => (
-                    <td key={c.n} className="px-4 py-2.5">{c.fields.get(label) ?? ""}</td>
+                    <td key={c.n} className="px-4 py-2.5">{label === "Status" ? STATUS_LABELS[c.fields.get(label) ?? ""] ?? c.fields.get(label) : c.fields.get(label) ?? ""}</td>
                   ))}
                 </tr>
               ))}

@@ -22,15 +22,15 @@ type Body = {
 // assistant can read past runs ("what did we find on that Anthropic role?").
 export async function POST(req: Request) {
   const b = await readJsonObject<Body>(req);
-  if (!b) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!b) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   const safeId = String(b.id ?? "").replace(/[^a-z0-9_-]/gi, "");
-  if (!safeId) return NextResponse.json({ error: "id required" }, { status: 400 });
+  if (!safeId) return NextResponse.json({ error: "Informe o identificador" }, { status: 400 });
 
   const dir = path.join(careerOpsRoot(), ".career-ops-web", "runs");
   try {
     fs.mkdirSync(dir, { recursive: true });
   } catch {
-    return NextResponse.json({ error: "mkdir failed" }, { status: 500 });
+    return NextResponse.json({ error: "Não foi possível criar o diretório" }, { status: 500 });
   }
   const steps = (Array.isArray(b.steps) ? b.steps : []).map((s) => `- ${s.kind === "tool" ? `🔧 ${s.label}` : s.label}`).join("\n");
   const verdict = b.result?.score != null ? `${b.result.score}/5 — ${b.result.summary || ""}` : "—";
@@ -51,6 +51,6 @@ ${b.output || ""}
     fs.writeFileSync(path.join(dir, `${safeId}.md`), md);
     return NextResponse.json({ ok: true });
   } catch {
-    return NextResponse.json({ error: "write failed" }, { status: 500 });
+    return NextResponse.json({ error: "Falha ao salvar" }, { status: 500 });
   }
 }

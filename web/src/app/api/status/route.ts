@@ -51,19 +51,19 @@ const CLIENT_ERROR_CODES = new Set(["usage", "invalid-state", "undo-unknown-prio
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ n?: string; status?: string; undo?: boolean }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const { n, status } = body;
   // {n, undo: true} takes back the row's last logged change (set-status.mjs
   // --undo). The CLI picks the status to restore, so there is none to check.
   if (body.undo === true) return writeStatus(n, null);
   if (!n || typeof status !== "string" || !status.trim()) {
-    return Response.json({ error: "n and status required" }, { status: 400 });
+    return Response.json({ error: "Informe o número da candidatura e o status" }, { status: 400 });
   }
   // Rejected here rather than left to the CLI: these characters would break the
   // markdown row, and refusing them before spawning keeps the failure cheap and
   // the message specific.
   if (/[|\r\n*]/.test(status)) {
-    return Response.json({ error: "invalid status (table-breaking characters)" }, { status: 400 });
+    return Response.json({ error: "Status inválido (caracteres incompatíveis com a tabela)" }, { status: 400 });
   }
   // Resolving aliases here lets the response echo the canonical label without
   // waiting on the CLI, and costs no process spawn for an unknown state.
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
   // not the authority.
   const canon = canonicalizeStatus(status);
   if (!canon) {
-    return Response.json({ error: `not a canonical status: ${status}` }, { status: 400 });
+    return Response.json({ error: `Status não reconhecido: ${status}` }, { status: 400 });
   }
   return writeStatus(n, canon);
 }
@@ -83,7 +83,7 @@ async function writeStatus(n: unknown, canon: string | null) {
   // would send "[object Object]" to --row and return the CLI's usage text.
   const row = trackerRowArg(n);
   if (!row) {
-    return Response.json({ error: "n must be a tracker row number" }, { status: 400 });
+    return Response.json({ error: "O número deve corresponder a uma linha do tracker" }, { status: 400 });
   }
 
   // The web can run against a CAREER_OPS_ROOT that holds data and no scripts.
@@ -95,7 +95,7 @@ async function writeStatus(n: unknown, canon: string | null) {
   if (!fs.existsSync(script)) {
     return Response.json(
       {
-        error: "status updates need the career-ops scripts; this root has data only",
+        error: "A atualização de status precisa dos scripts do career-ops; esta pasta contém apenas dados",
         code: "core-script-missing",
       },
       { status: 503 },
@@ -123,7 +123,7 @@ async function writeStatus(n: unknown, canon: string | null) {
     // Child stderr is a Node stack trace carrying absolute server paths. It
     // belongs in the server log, never in the response body.
     console.error(`/api/status: set-status.mjs failed to run: ${stderr.trim()}`);
-    return Response.json({ error: "status update failed to run" }, { status: 500 });
+    return Response.json({ error: "Não foi possível executar a atualização de status" }, { status: 500 });
   }
 
   // Killed by our own timeout. The child gets a shorter lock wait than this, so
@@ -132,7 +132,7 @@ async function writeStatus(n: unknown, canon: string | null) {
   // implying the change was rejected.
   if (timedOut) {
     return Response.json(
-      { error: "status update timed out; the change may or may not have been applied" },
+      { error: "A atualização de status expirou; a alteração pode ou não ter sido aplicada" },
       { status: 504, headers: { "Retry-After": "5" } },
     );
   }
@@ -160,7 +160,7 @@ async function writeStatus(n: unknown, canon: string | null) {
   }
 
   if (!parsed) {
-    return Response.json({ error: "status update returned no result" }, { status: 500 });
+    return Response.json({ error: "A atualização de status não retornou resultado" }, { status: 500 });
   }
 
   // Response shape is unchanged for existing callers; `changed` and

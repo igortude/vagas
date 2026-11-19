@@ -19,9 +19,9 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ roles?: string[]; location?: string[] }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const roles = (Array.isArray(body.roles) ? body.roles : []).map((r) => String(r).trim()).filter(Boolean).slice(0, 24);
-  if (roles.length === 0) return Response.json({ error: "no roles" }, { status: 400 });
+  if (roles.length === 0) return Response.json({ error: "Informe ao menos um cargo" }, { status: 400 });
 
   const root = careerOpsRoot();
   const file = portalsConfigPath(root);
@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   } catch (error) {
     const invalidUserConfig = error instanceof PortalsConfigError && error.kind === "invalid-user-config";
     return Response.json(
-      { error: error instanceof Error ? error.message : "could not load portals.yml" },
+      { error: error instanceof Error ? error.message : "Não foi possível carregar portals.yml" },
       { status: invalidUserConfig ? 409 : 500 },
     );
   }
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   try {
     atomicWriteWithBackup(file, text);
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message : "write failed" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message : "Falha ao salvar" }, { status: 500 });
   }
   return Response.json({ ok: true, roles: roles.length });
 }

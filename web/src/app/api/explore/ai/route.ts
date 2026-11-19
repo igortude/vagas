@@ -47,10 +47,10 @@ Follow modes/discover.md exactly. You are running headless for the web:
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ query?: string; cliId?: string }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const query = (body.query || "").trim();
   const requestedCliId = body.cliId;
-  if (!query || !requestedCliId) return Response.json({ error: "query and cliId required" }, { status: 400 });
+  if (!query || !requestedCliId) return Response.json({ error: "Informe a busca e o identificador da CLI" }, { status: 400 });
 
   const resolved = resolveCliOrFallback(requestedCliId);
   if (!resolved) return Response.json(cliUnavailableError(requestedCliId), { status: 404 });
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   try {
     mode = fs.readFileSync(path.join(careerOpsRoot(), "modes", "discover.md"), "utf8");
   } catch {
-    return Response.json({ code: "MODE_MISSING", error: "AI search needs a newer career-ops — update to enable it." }, { status: 400 });
+    return Response.json({ code: "MODE_MISSING", error: "A busca com IA precisa de uma versão mais recente do career-ops — atualize para habilitá-la." }, { status: 400 });
   }
 
   const { lines, urls: knownUrls } = assembleDedupContext();
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       {
         code: "CODEX_UNSUPPORTED",
         error:
-          "Codex CLI does not support the required read-only execution flags. Update Codex and try again.",
+          "A CLI do Codex não suporta as opções necessárias para execução somente leitura. Atualize o Codex e tente novamente.",
       },
       { status: 400 },
     );
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
       return Response.json(
         {
           code: "CODEX_TEMP_DIR_FAILED",
-          error: "AI search could not create an isolated Codex workspace.",
+          error: "A busca com IA não conseguiu criar um espaço de trabalho isolado para o Codex.",
         },
         { status: 400 },
       );
@@ -188,7 +188,7 @@ export async function POST(req: Request) {
     // in this route's own error shape rather than letting the throw escape POST
     // as an unhandled rejection and an unstructured 500.
     cleanupChildCwd();
-    return Response.json({ error: e instanceof Error ? e.message : "failed to start the CLI" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message : "Não foi possível iniciar a CLI" }, { status: 500 });
   }
 
   const encoder = new TextEncoder();

@@ -15,10 +15,10 @@ function hasCli(): boolean {
 }
 
 const LABELS: Record<string, string> = {
-  "cv.md": "your CV",
-  "config/profile.yml": "your profile — target roles, comp, location",
-  "modes/_profile.md": "your personalization",
-  "portals.yml": "the companies to scan",
+  "cv.md": "seu currículo",
+  "config/profile.yml": "seu perfil — cargos desejados, remuneração e localização",
+  "modes/_profile.md": "suas preferências",
+  "portals.yml": "as empresas a acompanhar",
 };
 
 // Detect (via the core's doctor.mjs) whether setup is incomplete, and offer to
@@ -40,29 +40,29 @@ export function OnboardingBanner() {
   if (dismissed || !d || !d.onboardingNeeded) return null;
   const items = d.missing.map((m) => LABELS[m] ?? m);
   const kickoff =
-    `Help me finish setting up career-ops. I still need to add ${items.join(", ")} — walk me through just those, conversationally, and write the files for me. Don't ask me for anything that's already set up (for example, don't ask for my CV if it's already saved).`;
+    `Ajude-me a terminar a configuração do career-ops. Ainda preciso adicionar ${items.join(", ")}. Oriente-me apenas nesses itens, em uma conversa, e crie os arquivos para mim. Não pergunte sobre o que já está configurado (por exemplo, não peça meu currículo se ele já estiver salvo).`;
 
   return (
     <div className="dot-bg relative mb-6 overflow-hidden rounded-2xl border border-brand/30 bg-gradient-to-br from-brand/10 via-surface/40 to-transparent p-5">
       <button
         onClick={() => setDismissed(true)}
         className="absolute right-3 top-3 text-faint transition-colors hover:text-foreground"
-        aria-label="Dismiss"
+        aria-label="Dispensar"
       >
         <X className="size-4" />
       </button>
-      <h2 className="font-display text-xl text-landing">Let&apos;s finish setting you up</h2>
+      <h2 className="font-display text-xl text-landing">Vamos terminar sua configuração</h2>
       <p className="mt-1.5 max-w-xl text-sm text-muted">
-        career-ops works best when it knows you. We still need {items.join(", ")}.{" "}
-        <span className="text-foreground">No YAML to edit</span> — answer in plain language and the assistant writes it
-        for you.
+        O career-ops funciona melhor quando conhece você. Ainda falta adicionar {items.join(", ")}.{" "}
+        <span className="text-foreground">Você não precisa editar YAML</span> — basta responder com suas palavras, e o assistente cria os arquivos
+        para você.
       </p>
       {cli ? (
         <button
           onClick={() => window.dispatchEvent(new CustomEvent("co-assistant", { detail: { message: kickoff } }))}
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200"
         >
-          <Sparkles className="size-4" /> Set me up with the assistant
+          <Sparkles className="size-4" /> Configurar com o assistente
         </button>
       ) : (
         // The assistant needs a CLI to run — without one the kickoff would silently
@@ -71,7 +71,7 @@ export function OnboardingBanner() {
           href="/config"
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200"
         >
-          <Settings className="size-4" /> Connect your AI CLI to get started
+          <Settings className="size-4" /> Conecte sua CLI de IA para começar
         </Link>
       )}
     </div>

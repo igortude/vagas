@@ -30,22 +30,22 @@ export function ScoreLevers({ report }: { report: string }) {
   if (holding.length + close.length + verify.length + strengths.length === 0) return null;
   return (
     <section data-testid="score-levers" className="mt-4 rounded-2xl border border-border bg-surface/30 px-5 py-4">
-      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">What would change this score</p>
+      <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-faint">O que mudaria esta nota</p>
       <div className="mt-3 grid gap-5 sm:grid-cols-2">
         <ItemList
-          title="Holding it down"
-          hint="Blockers and requirements with no evidence in your CV."
+          title="Segurando a nota"
+          hint="Bloqueios e requisitos sem evidência no seu currículo."
           items={holding.map((l) => ({ text: l.text, tag: l.importance ?? "blocker" }))}
           dot="bg-red-500"
         />
         <ItemList
-          title="Close calls"
-          hint="Partly covered. Clearer CV evidence could raise the score."
+          title="Quase lá"
+          hint="Parcialmente coberto. Evidências mais claras no currículo podem subir a nota."
           items={close.map((l) => ({ text: l.text, tag: l.importance ?? undefined }))}
           dot="bg-amber-500"
         />
-        <ItemList title="Working for you" hint="Your strongest matches for this role." items={strengths.map(plain)} dot="bg-emerald-500" />
-        <ItemList title="Check before you trust it" hint="Open questions behind the score." items={verify.map(plain)} dot="bg-sky-500" />
+        <ItemList title="A seu favor" hint="Suas combinações mais fortes para esta vaga." items={strengths.map(plain)} dot="bg-emerald-500" />
+        <ItemList title="Verifique antes de confiar" hint="Questões em aberto por trás da nota." items={verify.map(plain)} dot="bg-sky-500" />
       </div>
     </section>
   );

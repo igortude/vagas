@@ -103,23 +103,23 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await readJsonObject<Record<string, unknown>>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
 
   const cadence: Record<string, number> = {};
   for (const key of PROFILE_CADENCE_KEYS) {
     if (body[key] == null) continue;
     const n = Number.parseInt(String(body[key]), 10);
     if (!Number.isInteger(n) || n < 0) {
-      return Response.json({ error: `${key} must be a non-negative integer` }, { status: 400 });
+      return Response.json({ error: `${key} deve ser um número inteiro não negativo` }, { status: 400 });
     }
     cadence[key] = n;
   }
   if (body.enabled !== undefined && typeof body.enabled !== "boolean") {
-    return Response.json({ error: "enabled must be true or false" }, { status: 400 });
+    return Response.json({ error: "O campo enabled deve ser verdadeiro ou falso" }, { status: 400 });
   }
   const enabled = body.enabled as boolean | undefined;
   if (Object.keys(cadence).length === 0 && enabled === undefined) {
-    return Response.json({ error: "nothing to write" }, { status: 400 });
+    return Response.json({ error: "Nenhuma alteração para salvar" }, { status: 400 });
   }
 
   const root = careerOpsRoot();
@@ -144,12 +144,12 @@ export async function POST(req: Request) {
       source = fs.readFileSync(file, "utf8");
       parsed = yaml.load(source);
     } catch {
-      return Response.json({ error: "config/profile.yml exists but could not be read as YAML — refusing to overwrite it." }, { status: 409 });
+      return Response.json({ error: "config/profile.yml existe, mas não pôde ser lido como YAML — o arquivo não será sobrescrito." }, { status: 409 });
     }
     // A parseable list/scalar is still an invalid profile. Never replace its
     // contents with a document containing only the cadence patch.
     if (!isMapping(parsed)) {
-      return Response.json({ error: "config/profile.yml must contain named settings, not a list or single value. Refusing to overwrite it." }, { status: 409 });
+      return Response.json({ error: "config/profile.yml deve conter configurações nomeadas, não uma lista ou valor único. O arquivo não será sobrescrito." }, { status: 409 });
     }
     base = parsed as Record<string, unknown>;
   }
@@ -171,7 +171,7 @@ export async function POST(req: Request) {
     const text = patchProfileText(source, patch, merged) ?? yaml.dump(merged, { lineWidth: 100, noRefs: true });
     atomicWriteWithBackup(file, text);
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message : "write failed" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message : "Falha ao salvar" }, { status: 500 });
   }
   return Response.json({ ok: true, followup_cadence: merged.followup_cadence, follow_ups: merged.follow_ups });
 }

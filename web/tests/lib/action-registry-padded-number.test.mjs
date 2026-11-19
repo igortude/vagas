@@ -43,7 +43,7 @@ test("generatePdf names the company for a zero-padded application number", () =>
 test("setStatus names the company and role for a zero-padded application number", async () => {
   const { ctx, writes } = context();
   const result = dispatch("setStatus", { n: "007", status: "Applied" }, ctx);
-  assert.equal(result.summary, "Mark Acme · Engineer → Applied?");
+  assert.equal(result.summary, "Marcar Acme · Engineer → Applied?");
   await result.run();
   assert.deepEqual(writes, [["007", "Applied"]]);
 });

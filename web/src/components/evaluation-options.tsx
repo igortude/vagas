@@ -35,12 +35,12 @@ export function EvaluationOptions({ sections, onChange }: { sections: string[]; 
   const full = sections.length === FULL_EVALUATION.length;
   return (
     <fieldset className="min-w-0 rounded-xl border border-border bg-surface p-4">
-      <legend className="flex items-center gap-2 px-1 text-sm font-medium"><SlidersHorizontal className="size-4 text-brand-text" /> Evaluation sections</legend>
+      <legend className="flex items-center gap-2 px-1 text-sm font-medium"><SlidersHorizontal className="size-4 text-brand-text" /> Seções da avaliação</legend>
       <div className="mb-3 flex flex-wrap gap-2">
-        <button type="button" aria-pressed={sections.length === 1 && sections[0] === "summary"} onClick={() => onChange([...ESSENTIAL_EVALUATION])} className="rounded-full border border-border px-3 py-1.5 text-xs aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand-text">Essentials</button>
-        <button type="button" aria-pressed={full} onClick={() => onChange([...FULL_EVALUATION])} className="rounded-full border border-border px-3 py-1.5 text-xs aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand-text">Full evaluation</button>
+        <button type="button" aria-pressed={sections.length === 1 && sections[0] === "summary"} onClick={() => onChange([...ESSENTIAL_EVALUATION])} className="rounded-full border border-border px-3 py-1.5 text-xs aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand-text">Essencial</button>
+        <button type="button" aria-pressed={full} onClick={() => onChange([...FULL_EVALUATION])} className="rounded-full border border-border px-3 py-1.5 text-xs aria-pressed:border-brand aria-pressed:bg-brand-soft aria-pressed:text-brand-text">Avaliação completa</button>
       </div>
-      <p className="mb-3 flex items-start gap-2 text-xs text-muted"><Check className="mt-0.5 size-3.5 shrink-0 text-brand-text" /> Always included: fit score, key requirements and gaps, evidence confidence, and basic posting checks.</p>
+      <p className="mb-3 flex items-start gap-2 text-xs text-muted"><Check className="mt-0.5 size-3.5 shrink-0 text-brand-text" /> Sempre incluído: nota de aderência, requisitos principais e lacunas, confiança nas evidências e checagens básicas da vaga.</p>
       <div className="grid gap-2 sm:grid-cols-2">
         {EVALUATION_OPTIONS.map((option) => (
           <label key={option.id} className="flex cursor-pointer items-start gap-2 rounded-lg p-2 hover:bg-surface-hover">
@@ -49,8 +49,8 @@ export function EvaluationOptions({ sections, onChange }: { sections: string[]; 
           </label>
         ))}
       </div>
-      <p className="mt-3 text-[11px] text-muted">Your choice is remembered on this browser. Unchecked work is excluded from the AI request. Fewer sections usually use fewer tokens; reading the posting and your profile still has a cost.</p>
-      {!sections.includes("research") && <p className="mt-2 text-[11px] text-muted">Salary and company research is off. The score will flag evidence it could not verify.</p>}
+      <p className="mt-3 text-[11px] text-muted">Sua escolha fica lembrada neste navegador. O trabalho desmarcado fica de fora da requisição à IA. Menos seções costumam usar menos tokens; ler a vaga e seu perfil ainda tem um custo.</p>
+      {!sections.includes("research") && <p className="mt-2 text-[11px] text-muted">Pesquisa salarial e da empresa está desligada. A nota vai sinalizar evidências que não pôde verificar.</p>}
     </fieldset>
   );
 }

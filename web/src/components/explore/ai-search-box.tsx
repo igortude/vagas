@@ -5,9 +5,9 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { CostBadge } from "@/components/cost/cost-badge";
 
 const EXAMPLES = [
-  "AI infra roles at climate startups, remote EU",
-  "Forward-deployed engineer at Series A devtools, US-remote",
-  "Head of Applied AI at healthtech, posted this week",
+  "vagas de infra de IA em startups de clima, remoto na UE",
+  "engenheiro forward-deployed em devtools Series A, remoto nos EUA",
+  "Head de IA Aplicada em healthtech, publicada esta semana",
 ];
 
 // The "magic" natural-language box: a soft contained halo at rest that intensifies
@@ -52,7 +52,7 @@ export function AiSearchBox({
       <style>{STYLE}</style>
       <div className="co-aibox p-4">
         <div className="mb-2 flex items-center gap-2 text-[12px] font-medium text-brand-text">
-          <Sparkles className="size-3.5" /> Describe the role — an AI hunts the open web for it
+          <Sparkles className="size-3.5" /> Descreva a vaga — uma IA procura na web aberta por ela
         </div>
         <textarea
           ref={ref}
@@ -68,16 +68,16 @@ export function AiSearchBox({
               if (intent.trim()) onSubmit();
             }
           }}
-          placeholder="“AI infra at climate startups, remote EU, not staff-level” — plain language, your words"
+          placeholder="“infra de IA em startups de clima, remoto na UE, não nível staff” — linguagem natural, suas palavras"
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <span className="text-[12px] text-muted">
             {cliConfigured ? (
               <>
-                Reads the public web with <span className="text-foreground">{cliName || "your CLI"}</span> — it costs your tokens.
+                Lê a web pública com <span className="text-foreground">{cliName || "sua CLI"}</span> — consome seus tokens.
               </>
             ) : (
-              "Connect an AI CLI in Config to use AI search."
+              "Conecte uma CLI de IA na Configuração para usar a busca por IA."
             )}
           </span>
           <button
@@ -86,7 +86,7 @@ export function AiSearchBox({
             onClick={onSubmit}
             className="inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-foreground shadow-sm transition hover:brightness-110 disabled:opacity-50"
           >
-            Search the open web
+            Buscar na web aberta
             <CostBadge kind="spend" size="xs" />
             <ArrowRight className="size-4" />
           </button>
@@ -105,7 +105,7 @@ export function AiSearchBox({
           </button>
         ))}
         <button type="button" onClick={onRunScan} className="ml-auto inline-flex items-center gap-1 text-[12px] text-faint transition hover:text-foreground">
-          or run the free Scan instead →
+          ou rodar a varredura grátis →
         </button>
       </div>
     </div>

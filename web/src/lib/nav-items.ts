@@ -11,16 +11,16 @@ export type NavItem = {
 };
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/", label: "Today", icon: LayoutDashboard },
-  { href: "/explore", label: "Explore", icon: Compass, chip: "New" },
-  { href: "/scheduled-scans", label: "Scheduled scans", icon: CalendarClock },
+  { href: "/", label: "Hoje", icon: LayoutDashboard },
+  { href: "/explore", label: "Explorar", icon: Compass, chip: "Novo" },
+  { href: "/scheduled-scans", label: "Buscas agendadas", icon: CalendarClock },
   { href: "/pipeline", label: "Pipeline", icon: ListChecks },
   { href: "/followups", label: "Follow-ups", icon: Send },
-  { href: "/portals", label: "Portals", icon: Radar },
-  { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/cv", label: "CV", icon: FileText },
-  { href: "/documents", label: "Documents", icon: Files },
-  { href: "/config", label: "Config", icon: Settings },
+  { href: "/portals", label: "Portais", icon: Radar },
+  { href: "/analytics", label: "Análises", icon: BarChart3 },
+  { href: "/cv", label: "Currículo", icon: FileText },
+  { href: "/documents", label: "Documentos", icon: Files },
+  { href: "/config", label: "Configuração", icon: Settings },
 ];
 
 export function visibleNavItems(followupsEnabled: boolean): NavItem[] {

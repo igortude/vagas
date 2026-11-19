@@ -20,9 +20,9 @@ export default function JobsHistory() {
     <div className="mx-auto max-w-4xl px-6 py-10">
       <div className="flex items-end justify-between">
         <div>
-          <h1 className="font-display text-2xl tracking-tight text-landing">Workers</h1>
+          <h1 className="font-display text-2xl tracking-tight text-landing">Execuções de IA</h1>
           <p className="mt-1 text-sm text-muted">
-            AI runs started from this dashboard, kept in this browser. <span className="tabular-nums">{jobs.length}</span> total.
+            Execuções de IA iniciadas neste painel e mantidas neste navegador. <span className="tabular-nums">{jobs.length}</span> no total.
           </p>
         </div>
         {jobs.some((j) => j.status !== "running") && (
@@ -30,20 +30,20 @@ export default function JobsHistory() {
             onClick={clearFinished}
             className="inline-flex items-center gap-1.5 rounded-md border border-border bg-surface px-3 py-1.5 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
           >
-            <Trash2 className="size-3.5" /> Clear finished
+            <Trash2 className="size-3.5" /> Limpar concluídas
           </button>
         )}
       </div>
 
       {jobs.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-dashed border-border bg-surface/30 px-6 py-12 text-center text-sm text-muted">
-          No workers yet. Hit <span className="text-foreground">Evaluate</span> on an inbox posting to start one.
+          Ainda não há execuções. Clique em <span className="text-foreground">Avaliar</span> em uma vaga da caixa de entrada para iniciar uma.
           <span className="mt-2 block">
-            Ran an evaluation from your AI CLI? It shows up in{" "}
+            Avaliou uma vaga pela sua CLI de IA? Ela aparece no{" "}
             <Link href="/pipeline?tab=ALL" className="text-foreground underline-offset-2 hover:underline">
               Pipeline
             </Link>
-            , not here.
+            , não aqui.
           </span>
         </div>
       ) : (
@@ -71,7 +71,7 @@ export default function JobsHistory() {
                       {j.result.score}/5
                     </span>
                   )}
-                  <span className="hidden shrink-0 text-xs capitalize text-faint sm:block">{j.status}</span>
+                  <span className="hidden shrink-0 text-xs capitalize text-faint sm:block">{{ running: "Em andamento", done: "Concluída", error: "Erro" }[j.status]}</span>
                 </Link>
               </li>
             );

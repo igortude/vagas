@@ -42,10 +42,10 @@ type Msg = { role: "user" | "assistant"; content: string };
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ message?: string; cliId?: string; history?: Msg[]; pageContext?: string }>(req);
-  if (!body) return new Response(JSON.stringify({ error: "bad json" }), { status: 400 });
+  if (!body) return new Response(JSON.stringify({ error: "JSON inválido" }), { status: 400 });
   const { message, cliId: requestedCliId, pageContext } = body;
   if (!message || !requestedCliId) {
-    return new Response(JSON.stringify({ error: "message and cliId required" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "Informe a mensagem e o identificador da CLI" }), { status: 400 });
   }
 
   const resolved = resolveCliOrFallback(requestedCliId);
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
 
   let convo: string;
   try { convo = buildConversationContext(body.history ?? []); }
-  catch { return Response.json({ error: "Invalid conversation history" }, { status: 400 }); }
+  catch { return Response.json({ error: "Histórico de conversa inválido" }, { status: 400 }); }
   const pageLine = pageContext
     ? `\n\nCURRENT PAGE (the user is looking at this right now): ${pageContext}\nWhen the user's message is ambiguous ("this", "it", "apply", "evaluate this", "draft it"), assume it refers to what's on the current page.`
     : "";
@@ -135,7 +135,7 @@ export async function POST(req: Request) {
     // Fencing refuses an argv that contradicts the capability record. Report it
     // in this route's own error shape rather than letting the throw escape POST
     // as an unhandled rejection and an unstructured 500.
-    return Response.json({ error: e instanceof Error ? e.message : "failed to start the CLI" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message : "Não foi possível iniciar a CLI" }, { status: 500 });
   }
 
   const encoder = new TextEncoder();

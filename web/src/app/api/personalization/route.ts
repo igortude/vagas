@@ -28,7 +28,7 @@ const codeRoot = () => resolveCodeRoot(process.cwd(), process.env);
 
 function failure(e: unknown): Response {
   if (e instanceof UnsureProfileParseError) return Response.json({ error: e.message, code: e.code }, { status: 409 });
-  return Response.json({ error: e instanceof Error ? e.message : "personalization unavailable" }, { status: 500 });
+  return Response.json({ error: e instanceof Error ? e.message : "Personalização indisponível" }, { status: 500 });
 }
 
 async function corePersonalization() {
@@ -46,9 +46,9 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await readJsonObject<Record<string, unknown>>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const patch = coercePersonalization(body) as Record<string, unknown>;
-  if (Object.keys(patch).length === 0) return Response.json({ error: "nothing to write" }, { status: 400 });
+  if (Object.keys(patch).length === 0) return Response.json({ error: "Nenhuma alteração para salvar" }, { status: 400 });
 
   // dryRun: the panel/assistant can preview the exact bytes before the confirm
   // card is accepted — nothing touches disk.

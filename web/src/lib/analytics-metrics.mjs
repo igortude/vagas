@@ -9,7 +9,7 @@ const SCORE_BUCKETS = [
   { label: "4.0–4.4", min: 4, max: 4.5 },
   { label: "3.5–3.9", min: 3.5, max: 4 },
   { label: "3.0–3.4", min: 3, max: 3.5 },
-  { label: "Below 3.0", min: -Infinity, max: 3 },
+  { label: "Abaixo de 3.0", min: -Infinity, max: 3 },
 ];
 
 function scoreValue(value) {

@@ -1,12 +1,12 @@
 /** Optional report work. The fit score, evidence and posting checks are mandatory. */
 export const EVALUATION_OPTIONS = Object.freeze([
-  { id: "summary", label: "Job summary", description: "Responsibilities, location and working arrangements.", words: 120 },
-  { id: "strategy", label: "Level and application strategy", description: "Seniority, positioning and negotiation considerations.", words: 220 },
-  { id: "research", label: "Salary and company research", description: "External salary benchmarks, company signals and deeper posting checks.", words: 400 },
-  { id: "customization", label: "CV and LinkedIn suggestions", description: "Changes to emphasize for this role.", words: 250 },
-  { id: "interview", label: "Interview preparation", description: "Relevant stories and questions to prepare.", words: 700 },
-  { id: "application", label: "Application drafts", description: "Cover letter and application answers when the role qualifies.", words: 500 },
-  { id: "keywords", label: "Keywords and ATS coverage", description: "Posting keywords and coverage in your existing experience.", words: 180 },
+  { id: "summary", label: "Resumo da vaga", description: "Responsabilidades, localização e formato de trabalho.", words: 120 },
+  { id: "strategy", label: "Nível e estratégia de candidatura", description: "Senioridade, posicionamento e pontos de negociação.", words: 220 },
+  { id: "research", label: "Pesquisa salarial e da empresa", description: "Referências salariais externas, sinais da empresa e checagens mais profundas da vaga.", words: 400 },
+  { id: "customization", label: "Sugestões para currículo e LinkedIn", description: "Mudanças a destacar para esta vaga.", words: 250 },
+  { id: "interview", label: "Preparação para entrevista", description: "Histórias relevantes e perguntas para se preparar.", words: 700 },
+  { id: "application", label: "Rascunhos de candidatura", description: "Carta de apresentação e respostas quando a vaga se qualifica.", words: 500 },
+  { id: "keywords", label: "Palavras-chave e cobertura ATS", description: "Palavras-chave da vaga e a cobertura na sua experiência atual.", words: 180 },
 ]);
 export const FULL_EVALUATION = Object.freeze(EVALUATION_OPTIONS.map((option) => option.id));
 export const ESSENTIAL_EVALUATION = Object.freeze(["summary"]);
@@ -17,7 +17,7 @@ export function parseEvaluationOptions(value) {
   if (value === undefined) return { ok: true, sections: [...FULL_EVALUATION], full: true };
   if (!Array.isArray(value) || value.length > FULL_EVALUATION.length
     || value.some((id) => typeof id !== "string" || !FULL_EVALUATION.includes(id))) {
-    return { ok: false, error: "Choose valid evaluation sections before scoring." };
+    return { ok: false, error: "Escolha seções de avaliação válidas antes de pontuar." };
   }
   const sections = FULL_EVALUATION.filter((id) => value.includes(id));
   return { ok: true, sections, full: sections.length === FULL_EVALUATION.length };

@@ -11,8 +11,8 @@
  */
 export async function ingestErrorMessage(r) {
   if (r.ok) return null;
-  if (r.status === 404) return "Connect an AI CLI in Config first — it parses your CV locally.";
+  if (r.status === 404) return "A leitura local do currículo não está disponível. Atualize a página ou revise o texto sem IA.";
   const body = await r.json().catch(() => null);
   const reason = typeof body?.error === "string" ? body.error.trim() : "";
-  return reason || `Couldn't read your CV (error ${r.status}) — paste the text instead.`;
+  return reason || `Não foi possível ler o currículo (erro ${r.status}) — cole o texto ou tente revisar sem IA.`;
 }

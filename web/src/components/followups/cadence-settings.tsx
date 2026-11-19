@@ -6,17 +6,17 @@ import { Check, Loader2 } from "lucide-react";
 import { PROFILE_CADENCE_KEYS, type ProfileCadenceKey } from "@/lib/followups";
 import { cn } from "@/lib/cn";
 
-// Follow-up cadence knobs → config/profile.yml (followup_cadence). Server-
+// Frequência de acompanhamento knobs → config/profile.yml (followup_cadence). Server-
 // persisted (unlike the localStorage engine prefs above) because the core
 // followup-cadence.mjs reads the same keys — the CLI and the web must agree.
 
 const FIELDS: { key: ProfileCadenceKey; label: string; hint: string }[] = [
-  { key: "applied_first_days", label: "First follow-up", hint: "days after applying before the 1st nudge is due" },
-  { key: "applied_subsequent_days", label: "Between follow-ups", hint: "days between nudges while Applied" },
-  { key: "applied_max_followups", label: "Max follow-ups", hint: "after this many with no reply the lead goes cold" },
-  { key: "responded_initial_days", label: "Reply window", hint: "answer a company response within this many days" },
-  { key: "responded_subsequent_days", label: "Responded / assessment cadence", hint: "days between touches while in Responded or Assessment" },
-  { key: "interview_thankyou_days", label: "Thank-you note", hint: "due within this many days of reaching Interview" },
+  { key: "applied_first_days", label: "Primeiro acompanhamento", hint: "dias após a candidatura até o primeiro lembrete" },
+  { key: "applied_subsequent_days", label: "Intervalo entre acompanhamentos", hint: "dias entre lembretes enquanto o status for Enviada" },
+  { key: "applied_max_followups", label: "Máximo de acompanhamentos", hint: "após esse número de tentativas sem resposta, o contato esfria" },
+  { key: "responded_initial_days", label: "Prazo para responder", hint: "dias para responder a uma mensagem da empresa" },
+  { key: "responded_subsequent_days", label: "Intervalo após resposta ou teste", hint: "dias entre contatos enquanto o status for Respondida ou Teste" },
+  { key: "interview_thankyou_days", label: "Mensagem de agradecimento", hint: "enviar em até esse número de dias após iniciar as entrevistas" },
 ];
 
 export function CadenceSettings() {
@@ -31,7 +31,7 @@ export function CadenceSettings() {
 
   // On a failed load, do NOT fall back to defaults: the user would see 7/7/2/…
   // with no warning and a Save would overwrite their real profile.yml
-  // overrides. Show an error + Retry instead.
+  // overrides. Show an error + Tentar novamente instead.
   const load = useCallback(() => {
     setLoadError(false);
     fetch("/api/followups/cadence")
@@ -62,7 +62,7 @@ export function CadenceSettings() {
       const raw = values[k].trim();
       const n = raw === "" ? Number.NaN : Number(raw);
       if (!Number.isInteger(n) || n < 0) {
-        setError(`"${FIELDS.find((f) => f.key === k)?.label}" must be a whole number ≥ 0.`);
+        setError(`"${FIELDS.find((f) => f.key === k)?.label}" deve ser um número inteiro maior ou igual a 0.`);
         return;
       }
       payload[k] = n;
@@ -77,13 +77,13 @@ export function CadenceSettings() {
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(typeof j.error === "string" ? j.error : "Could not save.");
+        setError(typeof j.error === "string" ? j.error : "Não foi possível salvar.");
       } else {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
       }
     } catch {
-      setError("Could not save.");
+      setError("Não foi possível salvar.");
     }
     setSaving(false);
   };
@@ -99,7 +99,7 @@ export function CadenceSettings() {
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(typeof j.error === "string" ? j.error : "Could not save.");
+        setError(typeof j.error === "string" ? j.error : "Não foi possível salvar.");
       } else {
         setEnabled(next);
         // The nav is rendered on the server from the same setting. A router
@@ -107,7 +107,7 @@ export function CadenceSettings() {
         router.refresh();
       }
     } catch {
-      setError("Could not save.");
+      setError("Não foi possível salvar.");
     }
     setToggling(false);
   };
@@ -115,17 +115,17 @@ export function CadenceSettings() {
   return (
     <div>
       <label className="mt-8 mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-        Follow-up cadence
+        Frequência de acompanhamento
       </label>
       <div className="rounded-xl border border-border bg-surface/50 p-4">
         <p className="text-xs leading-relaxed text-faint">
-          When the <span className="text-muted">Follow-ups</span> tracker nudges you. Saved to{" "}
-          <span className="font-mono text-muted">config/profile.yml</span> — the CLI uses the same values.
+          Define quando a página <span className="text-muted">Acompanhamentos</span> avisa você. Salvo em{" "}
+          <span className="font-mono text-muted">config/profile.yml</span> — a CLI usa os mesmos valores.
         </p>
         {loadError ? (
           <div className="mt-3 text-sm text-muted">
             <p className="text-red-500">
-              Couldn&apos;t read your current cadence settings — not showing defaults, to avoid overwriting real values in{" "}
+              Não foi possível ler suas configurações de frequência. Os valores padrão não serão exibidos para evitar substituir os valores existentes em{" "}
               <span className="font-mono">config/profile.yml</span>.
             </p>
             <button
@@ -133,12 +133,12 @@ export function CadenceSettings() {
               onClick={load}
               className="mt-2 rounded-md border border-border bg-surface px-3 py-1.5 text-xs font-medium transition-colors hover:bg-surface-hover"
             >
-              Retry
+              Tentar novamente
             </button>
           </div>
         ) : values === null ? (
           <div className="mt-3 flex items-center gap-2 text-sm text-muted">
-            <Loader2 className="size-4 animate-spin" /> Loading…
+            <Loader2 className="size-4 animate-spin" /> Carregando…
           </div>
         ) : (
           <>
@@ -150,11 +150,11 @@ export function CadenceSettings() {
                 onChange={(e) => toggle(e.target.checked)}
                 className="size-4 accent-brand"
               />
-              Track follow-ups
+              Acompanhar candidaturas
               {toggling && <Loader2 className="size-3.5 animate-spin" />}
             </label>
             <p className="mt-0.5 text-xs text-faint">
-              Off hides the Follow-ups page and stops scheduling follow-up dates. Saved as{" "}
+              Ao desativar, a página de acompanhamentos fica oculta e as próximas datas deixam de ser agendadas. Salvo como{" "}
               <span className="font-mono text-muted">follow_ups.enabled</span>.
             </p>
             {enabled && (
@@ -185,7 +185,7 @@ export function CadenceSettings() {
                   )}
                 >
                   {saving ? <Loader2 className="size-3.5 animate-spin" /> : saved ? <Check className="size-3.5 text-emerald-400" /> : null}
-                  {saved ? "Saved" : "Save cadence"}
+                  {saved ? "Salvo" : "Salvar cadência"}
                 </button>
               </>
             )}

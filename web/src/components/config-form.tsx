@@ -9,6 +9,7 @@ import {
   Loader2,
   CircleDashed,
   ExternalLink,
+  Cpu,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { CadenceSettings } from "@/components/followups/cadence-settings";
@@ -23,6 +24,7 @@ type Cli = {
   url: string;
   installed: boolean;
   path: string | null;
+  models?: string[];
 };
 
 type Mode = "cli" | "key" | "manual";
@@ -34,7 +36,6 @@ const PROVIDERS = [
   { id: "openrouter", label: "OpenRouter" },
 ] as const;
 
-
 export function ConfigForm() {
   const [mode, setMode] = useState<Mode>("cli");
   const [clis, setClis] = useState<Cli[] | null>(null);
@@ -43,6 +44,8 @@ export function ConfigForm() {
   const [apiKey, setApiKey] = useState("");
   const [logos, setLogos] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [ollamaModel, setOllamaModel] = useState<string>("");
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
 
   // Load saved prefs
   useEffect(() => {
@@ -50,11 +53,10 @@ export function ConfigForm() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const v = JSON.parse(raw);
-        // key/manual are not wired yet (nothing reads them) → never restore into
-        // those dead panels; only the Installed-CLI path is functional.
         if (v.mode === "cli") setMode("cli");
         if (v.cliId) setCliId(v.cliId);
         if (v.provider) setProvider(v.provider);
+        if (v.ollamaModel) setOllamaModel(v.ollamaModel);
         if (typeof v.logos === "boolean") setLogos(v.logos);
       }
     } catch {
@@ -62,17 +64,19 @@ export function ConfigForm() {
     }
   }, []);
 
-  // Detect installed CLIs
+  // Detect installed CLIs and Ollama models
   useEffect(() => {
     fetch("/api/clis")
       .then((r) => r.json())
       .then((d) => {
         const list: Cli[] = d.clis ?? [];
         setClis(list);
+        const ollamaCli = list.find((c) => c.id === "ollama");
+        if (ollamaCli?.models && Array.isArray(ollamaCli.models)) {
+          setAvailableModels(ollamaCli.models);
+          setOllamaModel((prev) => prev || (ollamaCli.models ? ollamaCli.models[0] : "") || "qwen2.5-coder-abliterated:7b");
+        }
         setCliId((prev) => {
-          // A restored id whose CLI is no longer installed must not stick: it
-          // would stay selected and save() would write it straight back, so
-          // "open Config and click Save config" could never clear it (#4012).
           if (keepIfInstalled(prev, list)) return prev;
           return pickDefaultInstalled(list, typeof d.remembered === "string" ? d.remembered : null) ?? "";
         });
@@ -80,21 +84,19 @@ export function ConfigForm() {
       .catch(() => setClis([]));
   }, []);
 
-  // Persist the highlighted CLI when Config was never saved. Highlight-only
-  // looks configured while jobs still read empty localStorage, so whatever is
-  // rendered as selected must be written, at ANY installed count. The write
-  // lives here and not in the setCliId updater: React runs updaters during
-  // render, and the config-changed event it fires makes AssistantConsole set
-  // state mid-render.
   useEffect(() => {
     if (clis && cliId && !readSavedCliId()) persistCliId(cliId);
   }, [clis, cliId]);
 
   function save() {
-    // The API key is deliberately NOT persisted: nothing reads it yet (the
-    // key/manual panel is unwired) and a secret must never sit in clear-text
-    // localStorage. Keys belong in the user's own CLI/provider config.
-    writeConfig(localStorage, window, { mode, cliId, provider, logos });
+    writeConfig(localStorage, window, { mode, cliId, provider, logos, ollamaModel });
+    if (ollamaModel) {
+      fetch("/api/ollama/models", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: ollamaModel }),
+      }).catch(() => {});
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -103,37 +105,37 @@ export function ConfigForm() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-10">
-      <h1 className="font-display text-2xl tracking-tight text-landing">Config</h1>
+      <h1 className="font-display text-2xl tracking-tight text-landing">Configuração</h1>
       <p className="mt-1 text-sm text-muted">
-        Run career-ops on your own AI, right on your computer. Your CV and data never leave your machine.
+        Rode o career-ops na sua própria IA, direto no seu computador. Seu currículo e seus dados nunca saem da sua máquina.
       </p>
 
       {/* Engine mode */}
       <label className="mt-8 mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-        AI Engine
+        Motor de IA
       </label>
       <div className="grid gap-2 sm:grid-cols-3">
         <ModeCard
           active={mode === "cli"}
           onClick={() => setMode("cli")}
           icon={Terminal}
-          title="Use an AI tool you have"
-          hint="Recommended"
+          title="Use uma ferramenta de IA que você já tem"
+          hint="Recomendado"
         />
         <ModeCard
           active={mode === "key"}
           onClick={() => setMode("key")}
           icon={KeyRound}
-          title="Paste an AI key"
-          hint="Coming soon"
+          title="Colar uma chave de IA"
+          hint="Em breve"
           disabled
         />
         <ModeCard
           active={mode === "manual"}
           onClick={() => setMode("manual")}
           icon={TerminalSquare}
-          title="No setup needed"
-          hint="Coming soon"
+          title="Sem configuração"
+          hint="Em breve"
           disabled
         />
       </div>
@@ -142,26 +144,27 @@ export function ConfigForm() {
         {mode === "cli" && (
           <div>
             <p className="mb-1 text-sm text-muted">
-              career-ops uses an AI tool you already have — signed in, your own usage, nothing to paste.
+              O career-ops usa uma ferramenta de IA que você já tem — logada, com seu próprio uso, nada para colar.
             </p>
-            <p className="mb-3 text-xs text-faint">Works with Claude Code, Codex, OpenCode and more — free ones work great.</p>
+            <p className="mb-3 text-xs text-faint">Funciona com Ollama (Modelos Locais), OpenCode, Antigravity CLI, Claude Code e outros.</p>
             {clis === null ? (
               <div className="flex items-center gap-2 text-sm text-muted">
-                <Loader2 className="size-4 animate-spin" /> Checking what&apos;s on your computer…
+                <Loader2 className="size-4 animate-spin" /> Verificando o que está no seu computador…
               </div>
             ) : installed.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
-                No AI tool yet? Free options like <span className="text-foreground">OpenCode</span> with Qwen or GLM work great.{" "}
-                <a href="https://career-ops.org/docs/free-ai-engine" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-brand-text hover:underline">
-                  Get one free <ExternalLink className="size-3" />
+                Ainda sem ferramenta de IA? Opções gratuitas como <span className="text-foreground">Ollama</span> ou <span className="text-foreground">OpenCode</span> funcionam muito bem.{" "}
+                <a href="https://ollama.com" target="_blank" rel="noreferrer" className="inline-flex items-center gap-0.5 text-brand-text hover:underline">
+                  Instalar Ollama <ExternalLink className="size-3" />
                 </a>
               </div>
             ) : (
               <div className="space-y-2">
                 {clis.map((c) => {
                   const selected = c.id === cliId;
+                  const isOllama = c.id === "ollama";
                   const rowClassName = cn(
-                    "flex items-center gap-3 rounded-xl border px-4 py-3 text-sm transition-colors",
+                    "flex flex-col rounded-xl border px-4 py-3 text-sm transition-colors",
                     selected
                       ? "border-brand/50 bg-brand-soft"
                       : c.installed
@@ -171,31 +174,54 @@ export function ConfigForm() {
 
                   if (c.installed) {
                     return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setCliId(c.id)}
-                        aria-pressed={selected}
-                        className={cn(rowClassName, "w-full cursor-pointer text-left")}
-                      >
-                        <Check className="size-4 shrink-0 text-emerald-400" />
-                        <span className="flex min-w-0 flex-1 items-center gap-2">
-                          <span className={cn("font-medium", selected ? "text-foreground" : "")}>
-                            {c.name}
+                      <div key={c.id} className={rowClassName}>
+                        <button
+                          type="button"
+                          onClick={() => setCliId(c.id)}
+                          aria-pressed={selected}
+                          className="flex w-full cursor-pointer items-center gap-3 text-left"
+                        >
+                          <Check className="size-4 shrink-0 text-emerald-400" />
+                          <span className="flex min-w-0 flex-1 items-center gap-2">
+                            <span className={cn("font-medium", selected ? "text-foreground" : "")}>
+                              {c.name}
+                            </span>
+                            <span className="font-mono text-xs text-faint">{c.run}</span>
                           </span>
-                          <span className="font-mono text-xs text-faint">{c.run}</span>
-                        </span>
-                        <span className="hidden max-w-[40%] shrink-0 truncate text-xs text-faint sm:block">
-                          {c.path}
-                        </span>
-                      </button>
+                          <span className="hidden max-w-[40%] shrink-0 truncate text-xs text-faint sm:block">
+                            {c.path}
+                          </span>
+                        </button>
+
+                        {isOllama && selected && availableModels.length > 0 && (
+                          <div className="mt-3 ml-7 border-t border-border/40 pt-3">
+                            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted">
+                              <Cpu className="size-3.5 text-brand-text" /> Modelo Local do Ollama:
+                            </label>
+                            <select
+                              value={ollamaModel}
+                              onChange={(e) => setOllamaModel(e.target.value)}
+                              className="w-full rounded-lg border border-border bg-surface/80 px-3 py-1.5 text-xs font-mono text-foreground outline-none focus:border-brand/50"
+                            >
+                              {availableModels.map((m) => (
+                                <option key={m} value={m}>
+                                  {m}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-[11px] text-faint">
+                              Usado automaticamente para avaliar vagas e processar currículos com 100% de privacidade.
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     );
                   }
 
                   return (
                     <div
                       key={c.id}
-                      className={rowClassName}
+                      className={cn(rowClassName, "flex-row items-center gap-3")}
                     >
                       <CircleDashed className="size-4 shrink-0 text-faint" />
                       <button
@@ -214,19 +240,18 @@ export function ConfigForm() {
                         rel="noreferrer"
                         className="inline-flex shrink-0 items-center justify-center gap-1 text-xs text-brand-text hover:underline max-sm:min-h-[44px]"
                       >
-                        Install <ExternalLink className="size-3" />
+                        Instalar <ExternalLink className="size-3" />
                       </a>
                     </div>
                   );
                 })}
                 {installed.length === 0 && (
                   <p className="rounded-xl border border-dashed border-border bg-surface/30 p-4 text-xs text-muted">
-                    No supported CLI found on your PATH. Install one (e.g. Claude Code, Gemini CLI, OpenCode) to get started.
+                    Nenhuma CLI compatível encontrada no seu PATH. Instale uma (por exemplo Ollama, OpenCode, Antigravity CLI, Claude Code) para começar.
                   </p>
                 )}
                 <p className="mt-2 text-[11px] leading-relaxed text-faint">
-                  Best on <span className="text-muted">Claude Code</span> (live progress, the agentic apply + AI search,
-                  reliable evaluation persistence). Other CLIs work for the core flows with reduced features.
+                  O <span className="text-muted">Ollama</span> executa modelos totalmente locais e gratuitos sem necessidade de chaves de API externas.
                 </p>
               </div>
             )}
@@ -237,7 +262,7 @@ export function ConfigForm() {
           <div className="space-y-5">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Provider
+                Provedor
               </label>
               <div className="grid gap-2 sm:grid-cols-2">
                 {PROVIDERS.map((p) => (
@@ -259,9 +284,9 @@ export function ConfigForm() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-                Paste an AI key
+                Colar uma chave de IA
               </label>
-              <p className="mb-2 text-xs text-faint">Bring a key from OpenAI, Anthropic, and others.</p>
+              <p className="mb-2 text-xs text-faint">Use uma chave da OpenAI, Anthropic e outros.</p>
               <input
                 type="password"
                 value={apiKey}
@@ -271,7 +296,7 @@ export function ConfigForm() {
                 className="w-full rounded-xl border border-border bg-surface/60 px-4 py-2.5 font-mono text-sm outline-none transition-colors placeholder:text-faint focus:border-brand/50"
               />
               <p className="mt-2 text-xs text-faint">
-                Stored only in this browser — never sent anywhere but your chosen provider.
+                Armazenada apenas neste navegador — nunca enviada a outro lugar além do provedor escolhido.
               </p>
             </div>
           </div>
@@ -279,14 +304,14 @@ export function ConfigForm() {
 
         {mode === "manual" && (
           <div className="rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
-            The easiest way in — no keys, nothing to set up. On the roadmap.
+            O caminho mais fácil — sem chaves, nada para configurar. No roteiro.
           </div>
         )}
       </div>
 
       {/* Appearance / privacy */}
       <label className="mt-8 mb-2 block text-xs font-semibold uppercase tracking-[0.18em] text-muted">
-        Appearance
+        Aparência
       </label>
       <button
         type="button"
@@ -294,10 +319,10 @@ export function ConfigForm() {
         className="flex w-full items-center justify-between gap-4 rounded-xl border border-border bg-surface/50 px-4 py-3 text-left transition-colors hover:bg-surface-hover"
       >
         <span className="min-w-0">
-          <span className="block text-sm font-medium text-foreground">Company logos</span>
+          <span className="block text-sm font-medium text-foreground">Logos das empresas</span>
           <span className="mt-0.5 block text-xs text-faint">
-            Show each company&apos;s real logo. Fetched once through your local server and cached on
-            disk — only the employer domain is sent to a third party. Off = colored monograms only.
+            Mostra o logo real de cada empresa. Buscado uma vez pelo seu servidor local e armazenado em
+            disco — apenas o domínio do empregador é enviado a terceiros. Desligado = somente monogramas coloridos.
           </span>
         </span>
         <span
@@ -324,9 +349,9 @@ export function ConfigForm() {
           className="inline-flex items-center justify-center gap-2 rounded-full bg-brand px-5 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200 max-sm:min-h-[44px]"
         >
           {saved ? <Check className="size-4" /> : null}
-          {saved ? "Saved" : "Save config"}
+          {saved ? "Salvo" : "Salvar configuração"}
         </button>
-        <span className="text-xs text-faint">Local-first · on our roadmap</span>
+        <span className="text-xs text-faint">Local-first · no nosso roteiro</span>
       </div>
     </div>
   );

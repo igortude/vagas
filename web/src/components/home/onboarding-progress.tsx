@@ -19,10 +19,10 @@ type Section = { id: string; heading: string; state: "filled" | "template" | "mi
 // modes/_profile.md has no `ask` of its own: when it is absent its eight
 // sections are all "missing", and the personalization line below asks for them.
 const PREREQS: { key: string; label: string; ask?: string }[] = [
-  { key: "cv.md", label: "Your CV", ask: "my CV" },
-  { key: "config/profile.yml", label: "Profile — target roles, comp, location", ask: "my profile (target roles, comp, location)" },
-  { key: "modes/_profile.md", label: "Personalization file" },
-  { key: "portals.yml", label: "Companies and roles to scan", ask: "the roles and companies to scan" },
+  { key: "cv.md", label: "Seu currículo", ask: "meu currículo" },
+  { key: "config/profile.yml", label: "Perfil — cargos-alvo, remuneração, localização", ask: "meu perfil (cargos-alvo, remuneração, localização)" },
+  { key: "modes/_profile.md", label: "Arquivo de personalização" },
+  { key: "portals.yml", label: "Empresas e cargos para buscar", ask: "os cargos e empresas para buscar" },
 ];
 
 // Same reader the rest of the app uses, so "configured" cannot mean one thing
@@ -69,12 +69,12 @@ export function OnboardingProgress({ compact = false }: { compact?: boolean }) {
     ...PREREQS.filter((p) => missing.has(p.key)).flatMap((p) => (p.ask ? [p.ask] : [])),
     ...(generic.length ? [`my personalization (${generic.map((s) => s.heading.replace(/^## Your /, "").toLowerCase()).join(", ")})`] : []),
   ];
-  const kickoff = `Let's finish setting me up. Still to do: ${asks.join("; ")}. Walk me through it like a recruiter building my brief — one or two things at a time, propose what you infer from my CV, and let me confirm each piece. Don't ask for anything already on file.`;
+  const kickoff = `Vamos terminar de me configurar. Ainda falta: ${asks.join("; ")}. Me conduza como um recrutador montando meu briefing — uma ou duas coisas por vez, proponha o que deduzir do meu currículo e deixe eu confirmar cada parte. Não pergunte nada que já esteja registrado.`;
 
   return (
-    <aside className={`rounded-2xl border border-border bg-surface/40 ${compact ? "p-4" : "p-5"}`} aria-label="Setup progress">
+    <aside className={`rounded-2xl border border-border bg-surface/40 ${compact ? "p-4" : "p-5"}`} aria-label="Progresso da configuração">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-sm font-medium text-foreground">Your profile, as it takes shape</h2>
+        <h2 className="text-sm font-medium text-foreground">Seu perfil, tomando forma</h2>
         <span className="font-mono text-xs text-muted">{done}/{total}</span>
       </div>
       <div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-surface-hover">
@@ -85,7 +85,7 @@ export function OnboardingProgress({ compact = false }: { compact?: boolean }) {
         {PREREQS.map((p) => (
           <Row key={p.key} state={missing.has(p.key) ? "missing" : "filled"} label={p.label} />
         ))}
-        <li className="pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-faint">personalization — what evaluations score against</li>
+        <li className="pt-2 font-mono text-[10px] uppercase tracking-[0.18em] text-faint">personalização — o que as avaliações usam como referência</li>
         {sections.map((s) => (
           <Row key={s.id} state={s.state} label={s.heading.replace(/^## Your /, "")} />
         ))}
@@ -96,11 +96,11 @@ export function OnboardingProgress({ compact = false }: { compact?: boolean }) {
           onClick={() => window.dispatchEvent(new CustomEvent("co-assistant", { detail: { message: kickoff } }))}
           className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200"
         >
-          <Sparkles className="size-4" /> Continue with the assistant
+          <Sparkles className="size-4" /> Continuar com o assistente
         </button>
       ) : (
         <p className="mt-4 text-xs text-muted">
-          Connect your AI CLI in <a href="/config" className="text-foreground underline-offset-2 hover:underline">Config</a> and the assistant fills this in with you.
+          Conecte sua CLI de IA em <a href="/config" className="text-foreground underline-offset-2 hover:underline">Configuração</a> e o assistente preenche isso com você.
         </p>
       )}
     </aside>
@@ -110,7 +110,7 @@ export function OnboardingProgress({ compact = false }: { compact?: boolean }) {
 function Row({ state, label }: { state: "filled" | "template" | "missing"; label: string }) {
   const Icon = state === "filled" ? Check : state === "template" ? CircleDashed : Circle;
   const tone = state === "filled" ? "text-foreground" : "text-muted";
-  const hint = state === "template" ? "still the example" : state === "missing" ? "not yet" : "";
+  const hint = state === "template" ? "ainda é o exemplo" : state === "missing" ? "pendente" : "";
   return (
     <li className={`flex items-center gap-2 ${tone}`}>
       <Icon className={`size-3.5 shrink-0 ${state === "filled" ? "text-brand-text" : "text-faint"}`} aria-hidden />

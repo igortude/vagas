@@ -66,7 +66,15 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
   const [announcement, setAnnouncement] = useState("");
   const feedback = useRef<ReturnType<typeof createWorkerFeedback> | null>(null);
   useEffect(() => {
-    const owner = createWorkerFeedback(setAnnouncement);
+    const owner = createWorkerFeedback((text: string) => setAnnouncement(text
+      .replace(/: completed\./g, ": concluída.")
+      .replace(/: failed\./g, ": falhou.")
+      .replace(/^(\d+) workers:/, "$1 execuções:")
+      .replace(/(\d+) running\b/g, "$1 em andamento")
+      .replace(/(\d+) completed\b/g, "$1 concluídas")
+      .replace(/(\d+) failed\b/g, "$1 com falha")
+      .replace(/(\d+) unavailable\b/g, "$1 indisponíveis")
+      .replace("Open Worker history for details.", "Abra o histórico de execuções para ver os detalhes.")));
     feedback.current = owner;
     return () => { owner.dispose(); feedback.current = null; };
   }, []);
@@ -80,7 +88,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
       const arr = raw ? JSON.parse(raw) : null;
       if (Array.isArray(arr)) {
         // anything left "running" from a previous session is stale → mark interrupted
-        setJobs(arr.map((j: Job) => (j.status === "running" ? { ...j, status: "error", steps: [...(j.steps || []), { kind: "status", label: "Interrupted (page reloaded)", ts: Date.now() }] } : j)));
+        setJobs(arr.map((j: Job) => (j.status === "running" ? { ...j, status: "error", steps: [...(j.steps || []), { kind: "status", label: "Interrompido (página recarregada)", ts: Date.now() }] } : j)));
       }
     } catch {
       /* ignore */
@@ -135,7 +143,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
         evaluationSections: opts.evaluationSections ? [...opts.evaluationSections] : undefined,
         batchId: opts.batchId,
         status: "running",
-        steps: [{ kind: "status", label: "Starting…", ts: Date.now() }],
+        steps: [{ kind: "status", label: "Iniciando…", ts: Date.now() }],
         text: "",
         startedAt: Date.now(),
       };
@@ -153,8 +161,8 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
         // choice without a record.
         const cliId = await resolveCliId((stale, replacement) => {
           const label = replacement
-            ? `Saved CLI '${stale}' is not installed — using '${replacement}'`
-            : `Saved CLI '${stale}' is not installed`;
+            ? `A CLI salva '${stale}' não está instalada — usando '${replacement}'`
+            : `A CLI salva '${stale}' não está instalada`;
           const step: JobStep = { kind: "status", label, ts: Date.now() };
           steps.push(step);
           patch(id, (j) => ({ ...j, steps: [...j.steps, step] }));
@@ -165,7 +173,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
             ...j,
             status: "error",
             endedAt: Date.now(),
-            steps: [...j.steps, { kind: "status", label: "No CLI configured — open Config and click Save config", ts: Date.now() }],
+            steps: [...j.steps, { kind: "status", label: "Nenhuma CLI configurada — abra a Configuração e clique em Salvar configuração", ts: Date.now() }],
           }));
           return;
         }
@@ -213,7 +221,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
           });
           if (!res.ok || !res.body) {
             const e = await res.json().catch(() => ({}));
-            finish("error", e.error || "Failed to start");
+            finish("error", e.error || "Falha ao iniciar");
             return;
           }
           const completion = await readJobStream(res.body, (ev) => {
@@ -238,9 +246,9 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
           doneTokens = completion.tokens ?? 0;
           doneCostUsd = completion.costUsd ?? null;
           doneReportN = typeof completion.reportN === "number" ? completion.reportN : null;
-          finish("done", "Done");
+          finish("done", "Concluído");
         } catch {
-          finish("error", "Connection error");
+          finish("error", "Erro de conexão");
         }
       })();
 
@@ -259,7 +267,7 @@ export function JobsProvider({ children }: { children: React.ReactNode }) {
   return (
     <JobsContext.Provider value={value}>
       {children}
-      <div role="status" aria-label="Worker task status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
+      <div role="status" aria-label="Status da tarefa do worker" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
     </JobsContext.Provider>
   );
 }

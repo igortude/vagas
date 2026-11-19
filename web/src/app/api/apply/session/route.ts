@@ -13,7 +13,7 @@ export const maxDuration = 300; // the agentic drive + interpretation fallbacks 
 // deterministic extraction is low-confidence.
 export async function POST(req: Request) {
   const body = await readJsonObject<{ url?: string; cliId?: string; agent?: boolean; _noApplyBtn?: boolean }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const url = (body.url ?? "").trim();
   const blocked = await blockedApplyUrlResponse(url);
   if (blocked) return Response.json({ error: blocked.error }, { status: blocked.status });
@@ -31,6 +31,6 @@ export async function POST(req: Request) {
     if (isUnsafeApplyUrlError(e)) {
       return Response.json({ error: APPLY_URL_BLOCKED_MESSAGE }, { status: 400 });
     }
-    return Response.json({ error: e instanceof Error ? e.message.slice(0, 200) : "could not open the form" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message.slice(0, 200) : "Não foi possível abrir o formulário" }, { status: 500 });
   }
 }

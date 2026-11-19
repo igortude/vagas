@@ -19,12 +19,12 @@ export function QuickEvaluate() {
   function run() {
     const u = url.trim();
     if (!/^https?:\/\//i.test(u)) {
-      setHint("Paste a full job-posting URL (https://…).");
+      setHint("Cole a URL completa de uma vaga (https://…).");
       return;
     }
-    startJob({ title: "Evaluate · pasted URL", subtitle: u, kind: "evaluate", input: u, page: "/", evaluationSections: sections });
+    startJob({ title: "Avaliar · URL informada", subtitle: u, kind: "evaluate", input: u, page: "/", evaluationSections: sections });
     setUrl("");
-    setHint("Evaluating — watch it in the Workers tray.");
+    setHint("Avaliando — acompanhe o progresso no painel de agentes.");
   }
 
   return (
@@ -40,22 +40,22 @@ export function QuickEvaluate() {
           onKeyDown={(e) => {
             if (e.key === "Enter") run();
           }}
-          placeholder="Paste a job URL to evaluate…"
+          placeholder="Cole a URL de uma vaga para avaliar…"
           className="min-w-0 flex-1 bg-transparent py-1.5 text-sm outline-none placeholder:text-faint"
         />
         <button
           onClick={run}
           className="shrink-0 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200"
         >
-          Evaluate
+          Avaliar
         </button>
       </div>
       <div className="mt-2 flex items-center gap-2">
         <CostBadge kind="spend" size="xs" />
-        <span className="text-xs text-faint">Evaluation runs on your own AI — your key, your machine.</span>
+        <span className="text-xs text-faint">A avaliação usa a sua própria IA — sua chave, sua máquina.</span>
       </div>
       <details className="mt-3 max-w-xl">
-        <summary className="cursor-pointer text-xs text-brand-text">Evaluation options · {sections.length === FULL_EVALUATION.length ? "full evaluation" : `${sections.length} optional sections`}</summary>
+        <summary className="cursor-pointer text-xs text-brand-text">Opções de avaliação · {sections.length === FULL_EVALUATION.length ? "avaliação completa" : `${sections.length} seções opcionais`}</summary>
         <div className="mt-3"><EvaluationOptions sections={sections} onChange={setSections} /></div>
       </details>
       {hint && <p className="mt-1 text-xs text-faint">{hint}</p>}

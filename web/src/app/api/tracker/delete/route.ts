@@ -20,16 +20,16 @@ let deleting = false;
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ n?: string | number; dryRun?: boolean }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const num = String(body.n ?? "").trim();
   if (!/^\d+$/.test(num)) {
-    return Response.json({ error: "a numeric application number is required" }, { status: 400 });
+    return Response.json({ error: "Informe um número de candidatura válido" }, { status: 400 });
   }
   const dryRun = !!body.dryRun;
 
   if (!trackerCanDelete()) {
     return Response.json(
-      { error: "Removing a tracker row needs a newer career-ops — update to delete rows from here." },
+      { error: "A exclusão de uma linha do tracker precisa de uma versão mais recente do career-ops — atualize para excluir linhas por aqui." },
       { status: 400 },
     );
   }
@@ -37,12 +37,12 @@ export async function POST(req: Request) {
   // (tracker.mjs delete doesn't share a lock with merge-tracker yet).
   if (isTrackerWriting()) {
     return Response.json(
-      { error: "An evaluation is updating your tracker right now — try again in a moment." },
+      { error: "Uma avaliação está atualizando seu tracker agora — tente novamente em instantes." },
       { status: 409 },
     );
   }
   if (!dryRun && deleting) {
-    return Response.json({ error: "Another delete is already in progress — try again in a moment." }, { status: 409 });
+    return Response.json({ error: "Outra exclusão já está em andamento — tente novamente em instantes." }, { status: 409 });
   }
   if (!dryRun) deleting = true;
 
@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     if (result.code !== 0) {
       const notFound = /No application numbered/i.test(result.err);
       return Response.json(
-        { error: result.err.trim().split("\n")[0] || "delete failed" },
+        { error: result.err.trim().split("\n")[0] || "Falha na exclusão" },
         { status: notFound ? 404 : 400 },
       );
     }

@@ -40,26 +40,26 @@ export async function POST(req: Request) {
     notes?: string;
     note?: string; // legacy alias for notes
   }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
 
   const appNum = parseFollowupId(body.appNum ?? body.num);
   if (appNum === null) {
-    return Response.json({ error: "appNum (application #) required" }, { status: 400 });
+    return Response.json({ error: "Informe o número da candidatura (appNum)" }, { status: 400 });
   }
   const company = cell(body.company, 80);
-  if (!company) return Response.json({ error: "company required" }, { status: 400 });
+  if (!company) return Response.json({ error: "Informe a empresa" }, { status: 400 });
 
   // Default to the LOCAL day (local-first app — server clock is the user's
   // clock); validate as a REAL calendar date, not just the shape: one
   // impossible date (2026-13-45) in the log would crash the cadence engine.
   const date = (body.date ?? localISODate()).trim();
   if (!isRealISODate(date)) {
-    return Response.json({ error: "date must be a real calendar date (YYYY-MM-DD)" }, { status: 400 });
+    return Response.json({ error: "A data deve existir no calendário (AAAA-MM-DD)" }, { status: 400 });
   }
   const rawChannel = (body.channel ?? "Other").trim();
   const channel = CHANNELS.find((c) => c.toLowerCase() === rawChannel.toLowerCase());
   if (!channel) {
-    return Response.json({ error: `channel must be one of: ${CHANNELS.join(", ")}` }, { status: 400 });
+    return Response.json({ error: `O canal deve ser um destes: ${CHANNELS.join(", ")}` }, { status: 400 });
   }
   const role = cell(body.role, 80);
   const contact = cell(body.contact, 120);
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
       return Response.json({ ok: true, num, appNum, date, channel });
     });
   } catch (e) {
-    return followupsWriteError(e, "write failed");
+    return followupsWriteError(e, "Falha ao salvar");
   }
 }
 
@@ -108,12 +108,12 @@ export async function POST(req: Request) {
 // bullets carry no num and cannot be deleted here.
 export async function DELETE(req: Request) {
   const body = await readJsonObject<{ num?: string | number }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const num = parseFollowupId(body.num);
-  if (num === null) return Response.json({ error: "num required" }, { status: 400 });
+  if (num === null) return Response.json({ error: "Informe o número" }, { status: 400 });
 
   const file = followupsLogPath();
-  if (!fs.existsSync(file)) return Response.json({ error: "no follow-up log" }, { status: 404 });
+  if (!fs.existsSync(file)) return Response.json({ error: "Nenhum registro de acompanhamento encontrado" }, { status: 404 });
   try {
     return await withFollowupsWrite(() => {
       const lines = fs.readFileSync(file, "utf8").split("\n");
@@ -122,12 +122,12 @@ export async function DELETE(req: Request) {
         const first = line.split("|")[1]?.trim() ?? "";
         return Number.parseInt(first, 10) === num && /^\d+$/.test(first);
       });
-      if (idx === -1) return Response.json({ error: `follow-up #${num} not found` }, { status: 404 });
+      if (idx === -1) return Response.json({ error: `Acompanhamento nº ${num} não encontrado` }, { status: 404 });
       lines.splice(idx, 1);
       atomicWrite(file, lines.join("\n"));
       return Response.json({ ok: true, num });
     });
   } catch (e) {
-    return followupsWriteError(e, "delete failed");
+    return followupsWriteError(e, "Falha na exclusão");
   }
 }

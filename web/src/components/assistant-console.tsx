@@ -55,13 +55,13 @@ const PANEL_CLASS: Record<PanelSize, string> = {
 // The composer grows with its content (a pasted CV, a long answer) up to a cap
 // that scales with the panel, instead of staying a one-line box that scrolls.
 const INPUT_MAX_PX: Record<PanelSize, number> = { compact: 128, wide: 240, full: 360 };
-const SIZE_LABEL: Record<PanelSize, string> = { compact: "Wider", wide: "Full screen", full: "Compact" };
+const SIZE_LABEL: Record<PanelSize, string> = { compact: "Mais largo", wide: "Tela cheia", full: "Compacto" };
 // back-compat shims — the old directives still work, mapped onto the registry
 const NAV_RE = /<<\s*go:\s*(\/[a-z0-9/_-]*)\s*>>/gi;
 const REMEMBER_RE = /<<\s*remember:\s*([^>]+?)\s*>>/gi;
 
 const GREETING =
-  "Hi — I'm your career-ops assistant. I can walk you through onboarding, answer questions about your pipeline, or take you where you need to go. What would you like to do?";
+  "Oi — sou seu assistente do career-ops. Posso te guiar na configuração inicial, responder dúvidas sobre seu pipeline ou te levar onde você precisar. O que você gostaria de fazer?";
 
 // ── envelope parsing: act ONLY on complete <<act:ID {json}>> envelopes ────────
 function codeRanges(s: string): [number, number][] {
@@ -122,17 +122,17 @@ function removeRanges(s: string, cuts: [number, number][]): string {
 // Page awareness: describe the route so "this offer" / "apply" resolves to what
 // the user is looking at.
 function describePage(p: string): string {
-  if (p === "/") return "Today / home — overview of the user's pipeline.";
-  if (p === "/pipeline") return "Pipeline — the applications table + the inbox of pending job URLs.";
+  if (p === "/") return "Hoje / início — visão geral do pipeline da pessoa.";
+  if (p === "/pipeline") return "Pipeline — a tabela de candidaturas + a caixa de entrada de URLs de vagas pendentes.";
   const m = p.match(/^\/pipeline\/([^/]+)$/);
   if (m)
-    return `The user is viewing the EVALUATION REPORT for application #${m[1]}. If they say "this offer", "apply", "evaluate it", "draft a cover letter", they mean application #${m[1]} — read reports/${m[1]}-*.md or the matching data/applications.md row and act on THAT one.`;
-  if (p === "/analytics") return "Analytics — pipeline Sankey, funnel, score distribution, top companies.";
-  if (p === "/cv") return "CV editor (cv.md).";
-  if (p === "/config") return "Config — CLI / engine setup.";
-  if (p === "/apply") return "Apply — the form-proxy: the user is reviewing a job application re-rendered in plain language, pre-filled from their CV. You can write/revise answers via setApplyField.";
-  if (p.startsWith("/jobs/")) return "Watching a running worker / evaluation in progress.";
-  return `Route ${p}.`;
+    return `A pessoa está vendo o RELATÓRIO DE AVALIAÇÃO da candidatura nº ${m[1]}. Se ela disser "esta vaga", "candidatar", "avaliar isso", "rascunhar uma carta de apresentação", ela quer dizer a candidatura nº ${m[1]} — leia reports/${m[1]}-*.md ou a linha correspondente em data/applications.md e aja sobre ESSA.`;
+  if (p === "/analytics") return "Analytics — Sankey do pipeline, funil, distribuição de notas, principais empresas.";
+  if (p === "/cv") return "Editor de currículo (cv.md).";
+  if (p === "/config") return "Configuração — ajuste de CLI / motor.";
+  if (p === "/apply") return "Candidatura — o formulário-proxy: a pessoa está revisando uma candidatura re-renderizada em linguagem simples, pré-preenchida com o currículo dela. Você pode escrever/revisar respostas via setApplyField.";
+  if (p.startsWith("/jobs/")) return "Acompanhando um worker em execução / avaliação em andamento.";
+  return `Rota ${p}.`;
 }
 
 // ── persistence migration: old {role,content:string} → parts[] ────────────────
@@ -167,10 +167,10 @@ export function AssistantConsole() {
   const latestReplyIndex = messages.findLastIndex((m) => m.role === "assistant");
   const latestReply = messages[latestReplyIndex];
   const pendingConfirmations = messages.reduce((count, m) => count + (m.role === "assistant" ? m.parts.filter((p) => p.type === "confirm" && p.state === "pending").length : 0), 0);
-  const confirmationText = pendingConfirmations ? ` ${pendingConfirmations} ${pendingConfirmations === 1 ? "action needs" : "actions need"} confirmation.` : "";
-  const feedbackText = requestFeedback?.phase === "working" ? `Processing your request.${confirmationText}`
-    : requestFeedback?.phase === "error" ? "Request failed. Review the error."
-    : requestFeedback?.phase === "ready" ? `Reply ready.${confirmationText}` : "";
+  const confirmationText = pendingConfirmations ? ` ${pendingConfirmations} ${pendingConfirmations === 1 ? "ação precisa" : "ações precisam"} de confirmação.` : "";
+  const feedbackText = requestFeedback?.phase === "working" ? `Processando sua requisição.${confirmationText}`
+    : requestFeedback?.phase === "error" ? "A requisição falhou. Veja o erro."
+    : requestFeedback?.phase === "ready" ? `Resposta pronta.${confirmationText}` : "";
 
   // Only request transitions notify. Tokens, card decisions and history mounts
   // do not. Mark closed-panel events consumed so reopening never replays them.
@@ -296,7 +296,7 @@ export function AssistantConsole() {
   async function chatRequest(url: string, init?: RequestInit) {
     const response = await fetch(url, init);
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Conversation request failed");
+    if (!response.ok) throw new Error(data.error || "Falha na requisição da conversa");
     return data;
   }
   async function refreshChats() {
@@ -309,7 +309,7 @@ export function AssistantConsole() {
     let snapshot: Msg[];
     try { snapshot = cleanMessages(messagesRef.current) as Msg[]; }
     catch (e) {
-      const error = e instanceof Error ? e : new Error("Conversation could not be saved");
+      const error = e instanceof Error ? e : new Error("Não foi possível salvar a conversa");
       setSaveError(error.message);
       return Promise.reject(error);
     }
@@ -328,7 +328,7 @@ export function AssistantConsole() {
         setSaveError("");
         await refreshChats();
       } catch (e) {
-        setSaveError(e instanceof Error ? e.message : "Conversation was not saved");
+        setSaveError(e instanceof Error ? e.message : "A conversa não foi salva");
         throw e;
       }
     });
@@ -372,7 +372,7 @@ export function AssistantConsole() {
         setMessages(next);
         await refreshChats();
         setChatReady(true);
-      } catch (e) { if (!cancelled) setSaveError(e instanceof Error ? e.message : "Could not load conversations"); }
+      } catch (e) { if (!cancelled) setSaveError(e instanceof Error ? e.message : "Não foi possível carregar as conversas"); }
     }
     void restore();
     return () => { cancelled = true; };
@@ -409,7 +409,7 @@ export function AssistantConsole() {
       statusRuns.current.clear();
       setRequestFeedback(null);
       setAnnouncement("");
-    } catch (e) { setSaveError(e instanceof Error ? e.message : "Could not switch conversations"); }
+    } catch (e) { setSaveError(e instanceof Error ? e.message : "Não foi possível trocar de conversa"); }
     finally { setChatPending(false); }
   }
   function exportChat() {
@@ -424,7 +424,7 @@ export function AssistantConsole() {
   }
   async function discardAndStartChat() {
     if (busy || chatPending || !chatReady) return;
-    if (!window.confirm("Discard unsaved changes and start a new conversation? Saved conversations stay on disk. Export this conversation first if you want to keep the unsaved text.")) return;
+    if (!window.confirm("Descartar as alterações não salvas e iniciar uma nova conversa? As conversas salvas permanecem no disco. Exporte esta conversa antes se quiser guardar o texto não salvo.")) return;
     setChatPending(true);
     try {
       // Let writes already in flight finish before changing the active id.
@@ -442,14 +442,14 @@ export function AssistantConsole() {
     } finally { setChatPending(false); }
   }
   async function renameChat() {
-    const title = window.prompt("Conversation name", activeChat.current.title || "");
+    const title = window.prompt("Nome da conversa", activeChat.current.title || "");
     if (!title?.trim()) return;
     setChatPending(true);
     try { await flushChat(title.trim()); } catch { /* shown by flushChat */ }
     finally { setChatPending(false); }
   }
   async function removeChat() {
-    if (!window.confirm("Delete this conversation?")) return;
+    if (!window.confirm("Excluir esta conversa?")) return;
     setChatPending(true);
     try {
       await flushChat();
@@ -464,7 +464,7 @@ export function AssistantConsole() {
       setRequestFeedback(null);
       setAnnouncement("");
       await refreshChats();
-    } catch (e) { setSaveError(e instanceof Error ? e.message : "Could not delete conversation"); }
+    } catch (e) { setSaveError(e instanceof Error ? e.message : "Não foi possível excluir a conversa"); }
     finally { setChatPending(false); }
   }
 
@@ -544,11 +544,11 @@ export function AssistantConsole() {
       writeProfile: (patch) =>
         postAssistantWrite("/api/profile", patch).then((failure) => {
           if (!failure) router.refresh();
-          return failure ? `Your profile was NOT saved: ${failure}.` : null;
+          return failure ? `Seu perfil NÃO foi salvo: ${failure}.` : null;
         }),
       writePortals: (roles, location) =>
         postAssistantWrite("/api/portals", { roles, location }).then((failure) =>
-          failure ? `Your scan targets were NOT saved: ${failure}.` : null,
+          failure ? `Seus alvos de varredura NÃO foram salvos: ${failure}.` : null,
         ),
       writePersonalization: (patch) => {
         fetch("/api/personalization", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(patch) })
@@ -560,7 +560,7 @@ export function AssistantConsole() {
             // The onboarding panel listens for this to refetch section state.
             window.dispatchEvent(new CustomEvent("co-onboarding-changed"));
           })
-          .catch((e) => appendParts([{ type: "note", text: `Your personalization was NOT saved: ${e instanceof Error ? e.message : "the request failed"}` }]));
+          .catch((e) => appendParts([{ type: "note", text: `Sua personalização NÃO foi salva: ${e instanceof Error ? e.message : "a requisição falhou"}` }]));
       },
     };
   }
@@ -608,7 +608,7 @@ export function AssistantConsole() {
       entry.settled = !retryable;
       if (!retryable) entry.run = undefined;
       update({ state: known && !error.unconfirmed ? "failed" : "unconfirmed", retryable,
-        message: known ? error.message : "The status change could not be confirmed. Check the current tracker status before trying again." });
+        message: known ? error.message : "Não foi possível confirmar a mudança de status. Confira o status atual do tracker antes de tentar de novo." });
     } finally {
       entry.pending = false;
     }
@@ -624,7 +624,7 @@ export function AssistantConsole() {
     // that settles after the user switched chats updates only the card that
     // started it, never the chat now on screen.
     void info?.failure
-      ?.catch(() => "The write could not be confirmed.")
+      ?.catch(() => "Não foi possível confirmar a gravação.")
       .then((message) => {
         setMessages((ms) => ms.map((m) => ({ ...m,
           parts: m.parts.map((p) => p.type === "confirm" && !p.statusChange && p.cid === cid
@@ -696,7 +696,7 @@ export function AssistantConsole() {
       if (!res.ok || !res.body) {
         failed = true;
         const err = await res.json().catch(() => ({}));
-        setStreamText(`⚠️ ${err.error || "Assistant unavailable."}`);
+        setStreamText(`⚠️ ${err.error || "Assistente indisponível."}`);
         return;
       }
       const reader = res.body.getReader();
@@ -758,11 +758,11 @@ export function AssistantConsole() {
       // action-only response still counts, without approving its confirmation.
       if (!display.trim() && !hasActionOutput) {
         failed = true;
-        setStreamText("_(no output — is the CLI authenticated?)_");
+        setStreamText("_(sem saída — a CLI está autenticada?)_");
       }
     } catch (error) {
       failed = true;
-      setStreamText(reachedAssistant ? "⚠️ Connection error." : `⚠️ Request not sent: ${error instanceof Error ? error.message : "conversation could not be saved"}`);
+      setStreamText(reachedAssistant ? "⚠️ Erro de conexão." : `⚠️ Requisição não enviada: ${error instanceof Error ? error.message : "não foi possível salvar a conversa"}`);
     } finally {
       // flushChat already exposes save failures via its existing alert.
       setRequestFeedback({ id: requestId, phase: failed ? "error" : "ready", announce: reachedAssistant });
@@ -791,34 +791,34 @@ export function AssistantConsole() {
     const chips: { label: string; send: string }[] = [];
     const rep = pathname.match(/^\/pipeline\/(.+)$/);
     if (rep) {
-      chips.push({ label: "Why this score?", send: "Walk me through why this offer scored the way it did — strengths and red flags." });
-      chips.push({ label: "Should I apply?", send: "Given my profile, should I apply to this one? Be honest." });
-      chips.push({ label: "Draft a cover letter", send: "Draft a short, sharp cover letter for this role." });
+      chips.push({ label: "Por que essa nota?", send: "Explique por que esta vaga tirou essa nota — pontos fortes e alertas." });
+      chips.push({ label: "Devo me candidatar?", send: "Considerando meu perfil, devo me candidatar a esta? Seja honesto." });
+      chips.push({ label: "Rascunhar carta de apresentação", send: "Rascunhe uma carta de apresentação curta e afiada para esta vaga." });
       return chips;
     }
     const pending = pipeline.inbox.filter((j) => !j.done);
     if (!pipeline.applications.length && !pending.length) {
       return [
-        { label: "Help me get set up", send: "Help me get started with career-ops — what do you need from me?" },
-        { label: "Improve my CV", send: "Look at my CV and suggest the highest-impact improvements." },
+        { label: "Ajude-me a configurar", send: "Me ajude a começar com o career-ops — o que você precisa de mim?" },
+        { label: "Melhorar meu currículo", send: "Analise meu currículo e sugira as melhorias de maior impacto." },
       ];
     }
     if (pending.length) {
       const counts = new Map<string, number>();
       for (const j of pending) counts.set(j.company, (counts.get(j.company) ?? 0) + 1);
       const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
-      if (top && top[1] > 1) chips.push({ label: `Evaluate all ${top[0]} (${top[1]})`, send: `Evaluate all the pending ${top[0]} postings in my inbox.` });
-      chips.push({ label: `Triage inbox (${pending.length})`, send: `I have ${pending.length} postings in my inbox — which should I evaluate first, and why?` });
+      if (top && top[1] > 1) chips.push({ label: `Avaliar todas as ${top[0]} (${top[1]})`, send: `Avalie todas as vagas pendentes da ${top[0]} na minha caixa de entrada.` });
+      chips.push({ label: `Triar caixa de entrada (${pending.length})`, send: `Tenho ${pending.length} vagas na minha caixa de entrada — quais devo avaliar primeiro, e por quê?` });
     }
     const strong = pipeline.applications.filter((a) => scoreNum(a.score) >= 4.5).length;
-    if (strong) chips.push({ label: "Strong matches to act on", send: "Show me my strongest matches (4.5+) I haven't applied to yet, and tell me which to prioritise." });
-    chips.push({ label: "What should I do today?", send: "Look at my pipeline and tell me the 3 highest-leverage things I should do today." });
+    if (strong) chips.push({ label: "Combinações fortes para agir", send: "Mostre minhas melhores combinações (4.5+) às quais ainda não me candidatei e diga quais priorizar." });
+    chips.push({ label: "O que fazer hoje?", send: "Analise meu pipeline e diga as 3 coisas de maior impacto que devo fazer hoje." });
     return chips.slice(0, 4);
   }, [pathname, pipeline.inbox, pipeline.applications]);
 
   return (
     <>
-      <div role="status" aria-label="Assistant request status" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
+      <div role="status" aria-label="Status da requisição do assistente" aria-live="polite" aria-atomic="true" className="sr-only">{announcement}</div>
       {!open && (
         <button
           ref={openerRef}
@@ -828,7 +828,7 @@ export function AssistantConsole() {
           className="fixed bottom-5 right-5 z-50 flex items-center justify-center gap-2 rounded-full border border-border bg-surface/90 py-1.5 pl-1.5 pr-4 shadow-lg backdrop-blur transition-colors hover:bg-surface-hover max-sm:min-h-[44px]"
         >
           <CoMark size={26} />
-          <span className="text-sm font-medium">Ask<span className="sr-only"> the assistant</span></span>
+          <span className="text-sm font-medium">Perguntar<span className="sr-only"> ao assistente</span></span>
         </button>
       )}
 
@@ -849,36 +849,36 @@ export function AssistantConsole() {
           <header className="flex items-center gap-2.5 border-b border-border px-4 py-3">
             <CoMark size={26} />
             <div className="flex-1">
-              <div id={panelTitleId} className="text-sm font-semibold tracking-tight">Assistant</div>
-              <div className="text-xs text-faint">{cliId ? `via ${cliId}` : "no CLI configured"}</div>
+              <div id={panelTitleId} className="text-sm font-semibold tracking-tight">Assistente</div>
+              <div className="text-xs text-faint">{cliId ? `via ${cliId}` : "nenhuma CLI configurada"}</div>
             </div>
             <Button variant="ghost" size="icon" onClick={cycleSize} className="text-muted" aria-label={SIZE_LABEL[size]} title={SIZE_LABEL[size]}>
               {size === "full" ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => void selectChat()} disabled={busy || chatPending || !chatReady} className="text-muted" aria-label="New chat" title="New chat">
+            <Button variant="ghost" size="icon" onClick={() => void selectChat()} disabled={busy || chatPending || !chatReady} className="text-muted" aria-label="Nova conversa" title="Nova conversa">
               <RotateCcw className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={closeAssistant} className="text-muted" aria-label="Close assistant">
+            <Button variant="ghost" size="icon" onClick={closeAssistant} className="text-muted" aria-label="Fechar assistente">
               <X className="size-4" />
             </Button>
           </header>
 
           <div className="flex gap-2 border-b border-border px-4 py-2">
-            <select aria-label="Conversation history" className="min-w-0 flex-1 bg-surface text-sm" value={chats.some(c => c.id === activeChat.current.id) ? activeChat.current.id : ""} disabled={busy || chatPending || !chatReady} onChange={e => void selectChat(e.target.value || undefined)}>
-              <option value="">New chat</option>
+            <select aria-label="Histórico de conversas" className="min-w-0 flex-1 bg-surface text-sm" value={chats.some(c => c.id === activeChat.current.id) ? activeChat.current.id : ""} disabled={busy || chatPending || !chatReady} onChange={e => void selectChat(e.target.value || undefined)}>
+              <option value="">Nova conversa</option>
               {chats.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
             </select>
-            <button className="text-xs text-muted disabled:opacity-40" disabled={busy || chatPending || !activeChat.current.revision} onClick={() => void renameChat()}>Rename</button>
-            <button className="text-xs text-muted disabled:opacity-40" disabled={busy || chatPending || !activeChat.current.revision} onClick={() => void removeChat()}>Delete</button>
+            <button className="text-xs text-muted disabled:opacity-40" disabled={busy || chatPending || !activeChat.current.revision} onClick={() => void renameChat()}>Renomear</button>
+            <button className="text-xs text-muted disabled:opacity-40" disabled={busy || chatPending || !activeChat.current.revision} onClick={() => void removeChat()}>Excluir</button>
           </div>
-          {chatWarnings.map(warning => <div key={warning.id} role="alert" className="px-4 py-2 text-sm text-amber-600">{warning.error}. Other conversations are still available.</div>)}
+          {chatWarnings.map(warning => <div key={warning.id} role="alert" className="px-4 py-2 text-sm text-amber-600">{warning.error}. As outras conversas continuam disponíveis.</div>)}
           {saveError && <div role="alert" className="space-y-2 px-4 py-2 text-sm text-amber-600">
             <p>{saveError}</p>
             {chatReady ? <div className="flex flex-wrap gap-3">
-              <button className="underline" disabled={busy || chatPending} onClick={() => void flushChat().catch(() => {})}>Retry save</button>
-              <button className="underline" disabled={busy || chatPending} onClick={exportChat}>Export conversation</button>
-              <button className="underline" disabled={busy || chatPending} onClick={() => void discardAndStartChat()}>Discard unsaved changes and start new chat</button>
-            </div> : <button className="underline" onClick={() => window.location.reload()}>Reload</button>}
+              <button className="underline" disabled={busy || chatPending} onClick={() => void flushChat().catch(() => {})}>Tentar salvar de novo</button>
+              <button className="underline" disabled={busy || chatPending} onClick={exportChat}>Exportar conversa</button>
+              <button className="underline" disabled={busy || chatPending} onClick={() => void discardAndStartChat()}>Descartar alterações não salvas e iniciar nova conversa</button>
+            </div> : <button className="underline" onClick={() => window.location.reload()}>Recarregar</button>}
           </div>}
           <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
             {messages.map((m, i) => {
@@ -889,7 +889,7 @@ export function AssistantConsole() {
                   key={i}
                   ref={i === latestReplyIndex ? latestReplyRef : undefined}
                   role={m.role === "assistant" ? "group" : undefined}
-                  aria-label={m.role === "assistant" ? (i === latestReplyIndex ? "Latest assistant reply" : "Assistant reply") : undefined}
+                  aria-label={m.role === "assistant" ? (i === latestReplyIndex ? "Última resposta do assistente" : "Resposta do assistente") : undefined}
                   tabIndex={m.role === "assistant" ? -1 : undefined}
                   className={cn("flex rounded focus-visible:outline-2 focus-visible:outline-brand", m.role === "user" ? "justify-end" : "justify-start")}
                 >
@@ -938,13 +938,13 @@ export function AssistantConsole() {
               onClick={() => setOpen(false)}
               className="mx-4 mb-2 flex items-center gap-2 rounded-lg border border-border bg-surface/50 px-3 py-2 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
             >
-              <Settings className="size-3.5" /> Pick a CLI in Config to enable the assistant →
+              <Settings className="size-3.5" /> Escolha uma CLI na Configuração para ativar o assistente →
             </Link>
           )}
 
           <div className="border-t border-border p-3">
-            <label htmlFor={inputId} className="sr-only">Message to assistant</label>
-            <p id={inputHelpId} className="sr-only">Enter sends your message. Shift+Enter adds a new line.</p>
+            <label htmlFor={inputId} className="sr-only">Mensagem para o assistente</label>
+            <p id={inputHelpId} className="sr-only">Enter envia sua mensagem. Shift+Enter adiciona uma nova linha.</p>
             <div className="flex items-end gap-2">
               <textarea
                 id={inputId}
@@ -958,7 +958,7 @@ export function AssistantConsole() {
                     send();
                   }
                 }}
-                placeholder={cliId ? "Ask anything…" : "Configure a CLI first"}
+                placeholder={cliId ? "Pergunte qualquer coisa…" : "Configure uma CLI primeiro"}
                 rows={1}
                 disabled={!cliId}
                 style={{ maxHeight: INPUT_MAX_PX[size] }}
@@ -971,7 +971,7 @@ export function AssistantConsole() {
                 }}
                 disabled={busy || chatPending || !chatReady || !input.trim() || !cliId}
                 className="rounded-xl bg-brand p-2 text-brand-foreground transition-colors hover:bg-brand-200 disabled:opacity-40"
-                aria-label="Send"
+                aria-label="Enviar"
               >
                 {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
               </button>
@@ -984,12 +984,12 @@ export function AssistantConsole() {
                     latestReplyRef.current?.focus({ preventScroll: true });
                     latestReplyRef.current?.scrollIntoView({ block: "start", behavior: "instant" });
                   }} className="text-brand-text underline">
-                    {requestFeedback?.phase === "error" ? "Review error" : "Read latest reply"}
+                    {requestFeedback?.phase === "error" ? "Ver erro" : "Ler última resposta"}
                   </button>
                 )}
                 {pendingConfirmations > 0 && (
                   <button type="button" onClick={() => scrollRef.current?.querySelector<HTMLElement>('[data-assistant-confirmation="pending"]')?.focus()} className="text-brand-text underline">
-                    Review pending actions
+                    Revisar ações pendentes
                   </button>
                 )}
               </div>
@@ -1030,7 +1030,7 @@ function PartView({
     if (!job)
       return (
         <Link href={`/jobs/${part.jobId}`} className="block rounded-xl border border-border bg-surface/40 p-2.5 text-xs text-faint hover:text-foreground">
-          Worker finished earlier — open log →
+          O worker terminou antes — abrir log →
         </Link>
       );
     return (
@@ -1051,7 +1051,7 @@ function PartView({
       <div className="rounded-xl border border-border bg-surface/40 p-2.5">
         <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium">
           <Sparkles className="size-3.5 text-brand-text" />
-          {part.jobIds.length} evaluations
+          {part.jobIds.length} avaliações
           <span className="ml-auto tabular-nums text-faint">
             {workerBatchSummary(children, part.jobIds.length)}
           </span>
@@ -1112,24 +1112,24 @@ function ConfirmationCard({ part, onConfirm }: {
       {part.state === "pending" ? (
         <div className="mt-2 flex gap-2">
           <button
-            aria-label={`Confirm: ${part.summary}`}
+            aria-label={`Confirmar: ${part.summary}`}
             onClick={(e) => decide(e.currentTarget, true)}
             className="rounded-full bg-brand px-3 py-1 text-xs font-medium text-brand-foreground transition-colors hover:bg-brand-200"
           >
-            Confirm
+            Confirmar
           </button>
           <button
-            aria-label={`Cancel: ${part.summary}`}
+            aria-label={`Cancelar: ${part.summary}`}
             onClick={(e) => decide(e.currentTarget, false)}
             className="rounded-full border border-border px-3 py-1 text-xs text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
           >
-            Cancel
+            Cancelar
           </button>
         </div>
       ) : (
         <div ref={resultRef} tabIndex={-1} aria-labelledby={`${summaryId} ${resultId}`} className="mt-1 rounded text-xs text-faint focus-visible:outline-2 focus-visible:outline-brand">
           <span id={resultId} role={part.state === "failed" ? "alert" : undefined} className={part.state === "failed" ? "text-red-600 dark:text-red-400" : undefined}>
-            {part.state === "done" ? "✓ started" : part.state === "saving" ? "saving…" : part.state === "failed" ? part.message : "cancelled"}
+            {part.state === "done" ? "✓ iniciado" : part.state === "saving" ? "salvando…" : part.state === "failed" ? part.message : "cancelado"}
           </span>
         </div>
       )}

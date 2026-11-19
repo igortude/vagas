@@ -70,7 +70,7 @@ test("an unavailable result keeps the reason the route gave", () => {
     assert.deepEqual(m.tiers, []);
   }
   // A missing payload still yields a usable model rather than throwing.
-  assert.equal(coverageModel(undefined).reason, "unavailable");
+  assert.equal(coverageModel(undefined).reason, "indisponível");
   assert.equal(coverageModel(null).available, false);
 });
 

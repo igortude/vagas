@@ -9,12 +9,13 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 test("first-run home does not claim no setup", () => {
   const src = readFileSync(join(root, "src/components/home/first-run-home.tsx"), "utf8");
   assert.doesNotMatch(src, /No setup/);
-  assert.match(src, /PDF needs an AI CLI/);
+  assert.match(src, /Ollama organiza o currículo neste computador/);
 });
 
-test("pasted CV text can start without a CLI", () => {
+test("pasted CV uses local Ollama, with a no-AI review option", () => {
   const src = readFileSync(join(root, "src/components/cv/cv-ingest.tsx"), "utf8");
-  assert.match(src, /Pasted text is already readable/);
-  assert.match(src, /setPhase\("review"\)/);
+  assert.match(src, /\/api\/cv\/ingest-local/);
+  assert.doesNotMatch(src, /\/api\/cv\/ingest"/);
+  assert.match(src, /Revisar texto colado sem IA/);
   assert.match(src, /setSeed\(null\)/);
 });

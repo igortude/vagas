@@ -20,10 +20,10 @@ export async function POST(req: NextRequest) {
 
   const employer = body.preset === CHINA_PRESET;
   // Validate the raw source selection before the forgiving legacy filter codec.
-  if (body.preset && !employer) return Response.json({ error: "Unknown discovery preset." }, { status: 400 });
+  if (body.preset && !employer) return Response.json({ error: "Predefinição de descoberta desconhecida." }, { status: 400 });
   if (employer) {
     try { employerRequest(body); }
-    catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Invalid sources" }, { status: 400 }); }
+    catch (e) { return Response.json({ error: e instanceof Error ? e.message : "Fontes inválidas" }, { status: 400 }); }
   }
   const filters = parseExplorePatch(body, DEFAULT_FILTERS);
 
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           ? await runEmployerDiscovery(body, { codeRoot: path.dirname(rootScript("scan")), signal: abort.signal, onEvent: (e: ScanEvent) => send(e) })
           : await runDiscovery(filters, (e: ScanEvent) => send(e));
       } catch (err) {
-        send({ kind: "error", message: err instanceof Error ? err.message : "discovery failed" } satisfies ScanEvent);
+        send({ kind: "error", message: err instanceof Error ? err.message : "Falha na descoberta de vagas" } satisfies ScanEvent);
       }
       send({ kind: "done", count: offers.length, offers, cost: { tokens: 0, usd: 0 } } satisfies ScanEvent);
       controller.close();

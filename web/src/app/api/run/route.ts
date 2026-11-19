@@ -33,12 +33,12 @@ export const maxDuration = 800; // a real oferta evaluation / pdf-mode CV tailor
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ kind?: string; input?: string; cliId?: string; brief?: unknown; evaluationSections?: unknown }>(req);
-  if (!body) return new Response(JSON.stringify({ error: "bad json" }), { status: 400 });
+  if (!body) return new Response(JSON.stringify({ error: "JSON inválido" }), { status: 400 });
   const { kind = "evaluate", input, cliId: requestedCliId, brief } = body;
   const evaluation = kind === "evaluate" ? parseEvaluationOptions(body.evaluationSections) : undefined;
   if (evaluation && !evaluation.ok) return Response.json({ error: evaluation.error }, { status: 400 });
   if (!input || !requestedCliId) {
-    return new Response(JSON.stringify({ error: "input and cliId required" }), { status: 400 });
+    return new Response(JSON.stringify({ error: "Informe a entrada e o identificador da CLI" }), { status: 400 });
   }
   const resolved = resolveCliOrFallback(requestedCliId);
   if (!resolved) {
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   const capabilities = capabilitiesFor(kind);
   if (!isCliAllowedForCapabilities(cliId, capabilities)) {
     return new Response(
-      JSON.stringify({ error: `CLI '${cliId}' cannot run write-capable worker '${kind}' without a verified permission adapter.` }),
+      JSON.stringify({ error: `A CLI '${cliId}' não pode executar o worker '${kind}' com permissão de escrita sem um adaptador de permissões verificado.` }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   if (required && !fs.existsSync(/* turbopackIgnore: true */ requiredPath)) {
     return new Response(
       JSON.stringify({
-        error: `This needs a complete career-ops checkout (${required}). CAREER_OPS_ROOT has data only — point it at a full checkout.`,
+        error: `Isto precisa de um checkout completo do career-ops (${required}). CAREER_OPS_ROOT tem apenas dados — aponte-o para um checkout completo.`,
       }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
       });
     } catch (error) {
       console.error("[career-ops] Failed to load focused evaluation instructions:", error);
-      return Response.json({ error: "Could not load the selected evaluation instructions. No AI run was started." }, { status: 422 });
+      return Response.json({ error: "Não foi possível carregar as instruções de avaliação selecionadas. Nenhuma execução de IA foi iniciada." }, { status: 422 });
     }
   }
 
@@ -106,7 +106,7 @@ export async function POST(req: Request) {
   // wrong portal.
   if (kind === "fix-portal" && !isShellSafeCompanyName(input)) {
     return new Response(
-      JSON.stringify({ error: "That company name has characters I can't safely pass to the portal checker — rename it in portals.yml first." }),
+      JSON.stringify({ error: "Esse nome de empresa tem caracteres que não consigo passar com segurança ao verificador de portais — renomeie no portals.yml primeiro." }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -115,7 +115,7 @@ export async function POST(req: Request) {
   // hallucinate a fit narrative and still emit a VERDICT. Require cv.md first.
   if ((kind === "evaluate" || kind === "pdf" || kind === "cover") && !fs.existsSync(path.join(careerOpsRoot(), "cv.md"))) {
     return new Response(
-      JSON.stringify({ error: "Add your CV first so I can score this against you — drop it on the home page." }),
+      JSON.stringify({ error: "Adicione seu currículo primeiro para eu poder pontuar isto em relação a você — envie-o na página inicial." }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -224,7 +224,7 @@ export async function POST(req: Request) {
     // a refused argv would take the tracker down with it.
     if (writeToken !== null) releaseTrackerWrite(writeToken);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "failed to start the CLI" }),
+      JSON.stringify({ error: e instanceof Error ? e.message : "Não foi possível iniciar a CLI" }),
       { status: 500, headers: { "Content-Type": "application/json" } },
     );
   }
@@ -453,7 +453,7 @@ export async function POST(req: Request) {
       // successful render, not optimistically — same honesty-gate discipline as
       // persistEval below.
       const persistEval = async (markdown: string) => {
-        send({ type: "status", label: "Saving report…" });
+        send({ type: "status", label: "Salvando relatório…" });
         try {
           const result = await persistEvaluation({
             spawnFn: spawn,
@@ -477,13 +477,13 @@ export async function POST(req: Request) {
             send({ type: "done", tokens: lastTokens, costUsd: lastCostUsd });
           }
         } catch (e) {
-          send({ type: "error", msg: `Evaluation persist crashed unexpectedly: ${e instanceof Error ? e.message : String(e)}`.slice(0, 200) });
+          send({ type: "error", msg: `A persistência da avaliação falhou de forma inesperada: ${e instanceof Error ? e.message : String(e)}`.slice(0, 200) });
         } finally {
           close();
         }
       };
       const renderPdf = async (paths: PdfPaths, format: "letter" | "a4") => {
-        send({ type: "status", label: "Rendering PDF…" });
+        send({ type: "status", label: "Gerando PDF…" });
         // renderAndMarkPdf is designed to resolve, never throw — but this is
         // the one place nothing else awaits or catches this promise (cancel()
         // only attaches a .finally for the write-token release), so an
@@ -507,7 +507,7 @@ export async function POST(req: Request) {
           sendWarnings(result.warnings);
           send({ type: "done", tokens: lastTokens, costUsd: lastCostUsd });
         } catch (e) {
-          send({ type: "error", msg: `PDF rendering crashed unexpectedly: ${e instanceof Error ? e.message : String(e)}`.slice(0, 200) });
+          send({ type: "error", msg: `A geração do PDF falhou de forma inesperada: ${e instanceof Error ? e.message : String(e)}`.slice(0, 200) });
         } finally {
           close();
         }
@@ -551,9 +551,9 @@ export async function POST(req: Request) {
         const noOutputError = (): string | null => {
           if (!emittedText && !sawError && !cleanExit) {
             const detail = stderrErrorSnippet ? ` (${stderrErrorSnippet})` : "";
-            return `The CLI exited with an error — is it installed and authenticated?${detail}`;
+            return `A CLI saiu com erro — ela está instalada e autenticada?${detail}`;
           }
-          if (!emittedText && !sawError) return "The CLI produced no output — is it installed and authenticated? (career-ops is best on Claude Code.)";
+          if (!emittedText && !sawError) return "A CLI não produziu saída — ela está instalada e autenticada? (o career-ops funciona melhor no Claude Code.)";
           return null;
         };
 
@@ -580,7 +580,7 @@ export async function POST(req: Request) {
             // Kept for narrowing, but it must REPORT rather than fall through to a
             // bare close() — a stream that ends with neither error nor done is the
             // one outcome this handler exists to prevent.
-            send({ type: "error", msg: "Internal error: the pdf run passed its gate with no CV to save — please report this." });
+            send({ type: "error", msg: "Erro interno: a execução de PDF passou pelo gate sem nenhum currículo para salvar — por favor reporte isto." });
           } else {
             sendWarnings(envelope.warnings);
             if (saveCv(pdfPaths, envelope)) {
@@ -607,7 +607,7 @@ export async function POST(req: Request) {
           if (!outcome.ok) {
             send({ type: "error", msg: outcome.message });
           } else if (envelope?.ok !== true) {
-            send({ type: "error", msg: "Internal error: the evaluate run passed its gate with no report to save — please report this." });
+            send({ type: "error", msg: "Erro interno: a execução de avaliação passou pelo gate sem nenhum relatório para salvar — por favor reporte isto." });
           } else {
             evaluatePersistPromise = persistEval(envelope.markdown);
             return;
@@ -628,7 +628,7 @@ export async function POST(req: Request) {
           // message above; a bare non-clean exit gets the stderr snippet instead,
           // when the heuristic classifier found one.
           const detail = !sawError && stderrErrorSnippet ? ` (${stderrErrorSnippet})` : "";
-          send({ type: "error", msg: `This run hit an error before finishing, so it isn't recorded as a confident result — re-run it to verify.${detail}`.slice(0, 200) });
+          send({ type: "error", msg: `Esta execução deu erro antes de terminar, então não é registrada como resultado confiável — rode de novo para verificar.${detail}`.slice(0, 200) });
         } else {
           send({ type: "done", tokens: lastTokens, costUsd: lastCostUsd });
         }

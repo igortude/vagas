@@ -21,12 +21,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ content?: string }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   if (typeof body.content !== "string") {
-    return NextResponse.json({ error: "content required" }, { status: 400 });
+    return NextResponse.json({ error: "Informe o conteúdo" }, { status: 400 });
   }
   if (Buffer.byteLength(body.content, "utf8") > MAX_CV_BYTES) {
-    return NextResponse.json({ error: "CV is too large (over 200KB)" }, { status: 413 });
+    return NextResponse.json({ error: "O currículo é muito grande (mais de 200 KB)" }, { status: 413 });
   }
   // DATA_CONTRACT: cv.md is user-layer and gitignored (no git recovery). Never
   // blind-overwrite — snapshot the prior CV to a .bak first, write atomically.
@@ -34,6 +34,6 @@ export async function POST(req: Request) {
     const bak = atomicWriteWithBackup(cvPath(), body.content);
     return NextResponse.json({ ok: true, backedUp: !!bak });
   } catch {
-    return NextResponse.json({ error: "write failed" }, { status: 500 });
+    return NextResponse.json({ error: "Falha ao salvar" }, { status: 500 });
   }
 }

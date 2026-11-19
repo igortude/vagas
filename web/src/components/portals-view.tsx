@@ -12,10 +12,10 @@ type Company = { name: string; status: string; detail: string };
 type Result = { available: boolean; configured: boolean; companies: Company[]; error?: string };
 
 const TONE: Record<string, { dot: string; label: string; chip: string }> = {
-  live: { dot: "bg-emerald-500", label: "live", chip: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" },
-  empty: { dot: "bg-amber-500", label: "live · empty", chip: "bg-amber-500/15 text-amber-700 dark:text-amber-400" },
-  broken: { dot: "bg-red-500", label: "broken", chip: "bg-red-500/15 text-red-700 dark:text-red-400" },
-  skipped: { dot: "bg-zinc-400", label: "no ATS", chip: "bg-surface-hover text-muted" },
+  live: { dot: "bg-emerald-500", label: "ativo", chip: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" },
+  empty: { dot: "bg-amber-500", label: "ativo · sem vagas", chip: "bg-amber-500/15 text-amber-700 dark:text-amber-400" },
+  broken: { dot: "bg-red-500", label: "com falha", chip: "bg-red-500/15 text-red-700 dark:text-red-400" },
+  skipped: { dot: "bg-zinc-400", label: "sem ATS", chip: "bg-surface-hover text-muted" },
 };
 const ORDER: Record<string, number> = { broken: 0, empty: 1, live: 2, skipped: 3 };
 
@@ -58,49 +58,49 @@ export function PortalsView({ watched }: { watched: WatchedCompany[] }) {
           className="inline-flex items-center gap-2 rounded-full bg-brand px-4 py-2 text-sm font-medium text-brand-foreground transition-colors hover:bg-brand-200 disabled:opacity-50 max-sm:min-h-[44px]"
         >
           {loading ? <Loader2 className="size-4 animate-spin" /> : <Radar className="size-4" />}
-          Check portal health
+          Verificar os portais
         </button>
-        {loading && <span className="text-xs text-faint">Probing each company&apos;s ATS… (~30–60s)</span>}
+        {loading && <span className="text-xs text-faint">Verificando o ATS de cada empresa… (cerca de 30–60 s)</span>}
       </div>
 
       {!res && watched.length > 0 && <WatchedList watched={watched} />}
 
       {res && !res.available && !res.error && (
         <p className="mt-4 rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
-          <code className="text-foreground">verify-portals.mjs</code> not found — this needs a complete career-ops
-          checkout (the web orchestrates the core&apos;s validator).
+          <code className="text-foreground">verify-portals.mjs</code> não foi encontrado — é necessário ter uma instalação completa do career-ops
+          (a interface usa o verificador do núcleo).
         </p>
       )}
       {res && !res.available && res.error && (
         <p className="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-muted">
-          <span className="font-medium text-red-700 dark:text-red-400">The portal check did not finish</span> — no
-          portal was verified, so none is shown as healthy. Try again, or run{" "}
-          <code className="text-foreground">node verify-portals.mjs</code> to see why.{" "}
+          <span className="font-medium text-red-700 dark:text-red-400">A verificação dos portais não terminou</span> — nenhum
+          portal foi verificado, por isso nenhum aparece como ativo. Tente novamente ou execute{" "}
+          <code className="text-foreground">node verify-portals.mjs</code> para descobrir o motivo.{" "}
           <code className="break-all font-mono text-xs text-faint">{res.error}</code>
         </p>
       )}
       {res && res.available && !res.configured && (
         <p className="mt-4 rounded-xl border border-dashed border-border bg-surface/30 p-4 text-sm text-muted">
-          No <code className="text-foreground">portals.yml</code> yet — ask the assistant to set up the companies to scan.
+          O arquivo <code className="text-foreground">portals.yml</code> ainda não existe — peça ao assistente para configurar as empresas a acompanhar.
         </p>
       )}
 
       {res && res.configured && (
         <div className="mt-5">
           <p className="text-sm text-muted">
-            <span className="tabular-nums text-emerald-600 dark:text-emerald-400">{liveN}</span> live ·{" "}
-            <span className="tabular-nums text-red-600 dark:text-red-400">{broken.length}</span> broken ·{" "}
-            <span className="tabular-nums">{companies.length}</span> tracked
+            <span className="tabular-nums text-emerald-600 dark:text-emerald-400">{liveN}</span> ativos ·{" "}
+            <span className="tabular-nums text-red-600 dark:text-red-400">{broken.length}</span> com falha ·{" "}
+            <span className="tabular-nums">{companies.length}</span> acompanhados
           </p>
           {broken.length > 0 && (
             <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm">
               <span className="font-medium text-red-700 dark:text-red-400">
-                {broken.length} {broken.length === 1 ? "company silently drops" : "companies silently drop"} from every
-                scan
+                {broken.length} {broken.length === 1 ? "empresa deixa de aparecer" : "empresas deixam de aparecer"} em todas as
+                buscas
               </span>{" "}
               <span className="text-muted">
-                — their careers link is broken. Fix the <code>careers_url</code> in <code>portals.yml</code> (or ask the
-                assistant to repair them).
+                — o link de carreiras não funciona. Corrija <code>careers_url</code> em <code>portals.yml</code> (ou peça
+                ao assistente para corrigir).
               </span>
             </div>
           )}
@@ -114,7 +114,7 @@ export function PortalsView({ watched }: { watched: WatchedCompany[] }) {
                   <span className="shrink-0 text-sm font-medium">{c.name}</span>
                   <span className="truncate font-mono text-xs text-faint">{c.detail}</span>
                   <div className="ml-auto flex shrink-0 items-center gap-2">
-                    {c.status === "broken" && <FixAffordance company={c.name} job={fixByCompany.get(c.name)} onFix={() => startJob({ title: `Fix · ${c.name}`, subtitle: "repair portal slug", kind: "fix-portal", input: c.name, page: "/portals" })} />}
+                    {c.status === "broken" && <FixAffordance company={c.name} job={fixByCompany.get(c.name)} onFix={() => startJob({ title: `Corrigir · ${c.name}`, subtitle: "corrigir o endereço do portal", kind: "fix-portal", input: c.name, page: "/portals" })} />}
                     <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", t.chip)}>{t.label}</span>
                   </div>
                 </li>
@@ -131,22 +131,22 @@ function FixAffordance({ company, job, onFix }: { company: string; job?: Job; on
   if (job?.status === "running")
     return (
       <Link href={`/jobs/${job.id}`} className="inline-flex items-center gap-1 text-xs font-medium text-brand-text">
-        <Loader2 className="size-3 animate-spin" /> Fixing…
+        <Loader2 className="size-3 animate-spin" /> Corrigindo…
       </Link>
     );
   if (job?.status === "done")
     return (
       <Link href={`/jobs/${job.id}`} className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-        repaired · re-check
+        corrigido · verificar novamente
       </Link>
     );
   return (
     <button
       onClick={onFix}
-      title={`Have the agent repair ${company}'s portal slug`}
+      title={`Pedir ao agente para corrigir o endereço do portal de ${company}`}
       className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs text-muted transition-colors hover:border-brand/40 hover:text-brand-text"
     >
-      <Wrench className="size-3" /> Fix
+      <Wrench className="size-3" /> Corrigir
     </button>
   );
 }
@@ -156,9 +156,9 @@ function WatchedList({ watched }: { watched: WatchedCompany[] }) {
   return (
     <div className="mt-5">
       <p className="text-sm text-muted">
-        <span className="tabular-nums text-foreground">{scanned}</span> scanned ·{" "}
-        <span className="tabular-nums">{watched.length - scanned}</span> paused · run a health check to see which boards
-        still answer
+        <span className="tabular-nums text-foreground">{scanned}</span> monitorados ·{" "}
+        <span className="tabular-nums">{watched.length - scanned}</span> pausados · verifique os portais para saber quais
+        ainda respondem
       </p>
       <ul className="mt-4 divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface/40">
         {watched.map((c, i) => (
@@ -168,7 +168,7 @@ function WatchedList({ watched }: { watched: WatchedCompany[] }) {
             <span className="truncate font-mono text-xs text-faint">{c.host}</span>
             {!c.enabled && (
               <span className="ml-auto shrink-0 rounded bg-surface-hover px-1.5 py-0.5 text-[10px] font-semibold text-muted">
-                paused
+                pausado
               </span>
             )}
           </li>

@@ -45,7 +45,7 @@ export async function GET(req: Request) {
       return Response.json({ offers: [], count: 0 });
     }
     return Response.json(
-      { error: `scan history could not be read: ${(err as Error)?.message ?? "unknown error"}`, offers: [], count: 0 },
+      { error: `scan history could not be read: ${(err as Error)?.message ?? "erro desconhecido"}`, offers: [], count: 0 },
       { status: 500 },
     );
   }

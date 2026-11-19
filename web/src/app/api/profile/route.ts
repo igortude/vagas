@@ -64,12 +64,12 @@ export async function POST(req: Request) {
   try {
     payload = await req.json();
   } catch {
-    return Response.json({ error: "bad json" }, { status: 400 });
+    return Response.json({ error: "JSON inválido" }, { status: 400 });
   }
   const error = profilePatchError(payload);
   if (error) return Response.json({ error }, { status: 400 });
   const proposed = patchToProfile(payload as ProfilePatch);
-  if (Object.keys(proposed).length === 0) return Response.json({ error: "nothing to write" }, { status: 400 });
+  if (Object.keys(proposed).length === 0) return Response.json({ error: "Nenhuma alteração para salvar" }, { status: 400 });
 
   const root = careerOpsRoot();
   const file = getProfilePath(root);
@@ -94,12 +94,12 @@ export async function POST(req: Request) {
       source = fs.readFileSync(file, "utf8");
       parsed = yaml.load(source);
     } catch {
-      return Response.json({ error: "config/profile.yml exists but is not valid YAML — refusing to overwrite it." }, { status: 409 });
+      return Response.json({ error: "config/profile.yml existe, mas não contém YAML válido — o arquivo não será sobrescrito." }, { status: 409 });
     }
     // Valid YAML can still be a list, scalar, or null. Treating those as an
     // empty profile would discard the existing document on this partial write.
     if (!isMapping(parsed)) {
-      return Response.json({ error: "config/profile.yml must contain named settings, not a list or single value. Refusing to overwrite it." }, { status: 409 });
+      return Response.json({ error: "config/profile.yml deve conter configurações nomeadas, não uma lista ou valor único. O arquivo não será sobrescrito." }, { status: 409 });
     }
     base = parsed as Record<string, unknown>;
   }
@@ -114,7 +114,7 @@ export async function POST(req: Request) {
       yaml.dump(merged, { lineWidth: 100, noRefs: true });
     atomicWriteWithBackup(file, text);
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message : "write failed" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message : "Falha ao salvar" }, { status: 500 });
   }
   return Response.json({ ok: true, seeded });
 }

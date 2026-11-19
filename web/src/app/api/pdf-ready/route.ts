@@ -17,10 +17,10 @@ const FALLBACK = "could not mark the PDF ready";
 // from the data root. The argument is the report number, not the tracker row number.
 export async function POST(req: Request) {
   const body = await readJsonObject<{ report?: unknown }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   const report = digitArg(body.report);
   if (!report) {
-    return NextResponse.json({ error: "report must be a report number" }, { status: 400 });
+    return NextResponse.json({ error: "O relatório deve ser identificado por um número" }, { status: 400 });
   }
   const mark = await markTrackerReady({ spawnFn: spawn, execPath: process.execPath, root: path.dirname(rootScript("mark-pdf-ready")), reportNum: report });
   if (!mark.ok && !mark.data) console.error(`/api/pdf-ready: ${mark.stderr}`);

@@ -28,11 +28,11 @@ const ERROR_MSG: Record<string, string> = {
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ url?: unknown; done?: unknown }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
 
   const url = typeof body.url === "string" ? body.url : "";
   if (body.done !== undefined && typeof body.done !== "boolean") {
-    return NextResponse.json({ error: "done must be a boolean" }, { status: 400 });
+    return NextResponse.json({ error: "O campo done deve ser verdadeiro ou falso" }, { status: 400 });
   }
   const done = body.done !== false;
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   const lockModule = path.join(root, "pipeline-lock.mjs");
   if (!fs.existsSync(lockModule)) {
     return NextResponse.json(
-      { error: "inbox skip needs the career-ops scripts; this root has data only", code: "core-script-missing" },
+      { error: "A exclusão da caixa de entrada precisa dos scripts do career-ops; esta pasta contém apenas dados", code: "core-script-missing" },
       { status: 503 },
     );
   }
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     if (!result.ok) {
       const code = result.error;
       return NextResponse.json(
-        { error: ERROR_MSG[code] ?? "skip failed", code },
+        { error: ERROR_MSG[code] ?? "Não foi possível ocultar a vaga", code },
         {
           status: ERROR_HTTP[code] ?? 400,
           ...(code === "busy" ? { headers: { "Retry-After": "5" } } : {}),
@@ -60,6 +60,6 @@ export async function POST(req: Request) {
     }
     return NextResponse.json({ ok: true, done, matched: result.matched, changed: result.changed });
   } catch {
-    return NextResponse.json({ error: "write failed" }, { status: 500 });
+    return NextResponse.json({ error: "Falha ao salvar" }, { status: 500 });
   }
 }

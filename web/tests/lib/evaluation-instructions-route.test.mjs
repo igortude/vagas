@@ -44,7 +44,7 @@ for (const reason of ["missing file", "incomplete instructions"]) {
       body: JSON.stringify({ kind: "evaluate", cliId: "claude", input: "https://jobs.example.test/1", evaluationSections: ["summary"] }),
     }));
     assert.equal(response.status, 422);
-    assert.deepEqual(await response.json(), { error: "Could not load the selected evaluation instructions. No AI run was started." });
+    assert.deepEqual(await response.json(), { error: "Não foi possível carregar as instruções de avaliação selecionadas. Nenhuma execução de IA foi iniciada." });
     assert.equal(errors.length, 1);
     assert.match(errors[0][0], /Failed to load focused evaluation instructions/);
     assert.ok(errors[0][1] instanceof Error);

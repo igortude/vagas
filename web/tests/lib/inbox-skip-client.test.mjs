@@ -86,7 +86,7 @@ test("a slow posting does not block an independent posting", async () => {
 });
 
 test("HTTP and network failures remain errors", async () => {
-  await assert.rejects(queueInboxSkip(new Map(), url, false, async () => new Response("unavailable", { status: 503 })), /Could not save/);
+  await assert.rejects(queueInboxSkip(new Map(), url, false, async () => new Response("unavailable", { status: 503 })), /Não foi possível salvar/);
   await assert.rejects(queueInboxSkip(new Map(), url, false, async () => { throw new Error("offline"); }), /offline/);
 });
 

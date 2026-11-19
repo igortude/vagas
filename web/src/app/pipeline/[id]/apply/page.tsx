@@ -71,7 +71,7 @@ export default async function ApplyPage({
     : null;
 
   const suffix = query ? `?${query}` : "";
-  const company = app?.company || parseReport(report?.content ?? "").title || `Report #${id}`;
+  const company = app?.company || parseReport(report?.content ?? "").title || `Relatório nº ${id}`;
   return (
     <ApplyChecklist
       company={company}

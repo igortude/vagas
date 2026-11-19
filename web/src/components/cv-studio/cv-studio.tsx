@@ -15,13 +15,13 @@ type LoadState = { kind: "loading" } | { kind: "error"; reason: string } | { kin
 type SaveState = { kind: "idle" } | { kind: "saving" } | { kind: "saved"; pdf: string; indexed: boolean; warnings: string[] } | { kind: "failed"; error: string };
 
 const REASONS: Record<string, { title: string; body: string }> = {
-  "no-tailored-cv": { title: "No tailored CV yet", body: "Generate a tailored CV from the report page first. The Studio opens it for review once it exists." },
-  "unreadable-layout": { title: "This CV layout is not supported yet", body: "The Studio reads CVs built from the career-ops templates. Open the PDF from the report page instead." },
-  "no-report": { title: "Report not found", body: "There is no evaluation report with this number." },
+  "no-tailored-cv": { title: "Ainda sem currículo adaptado", body: "Gere um currículo adaptado pela página do relatório primeiro. O Estúdio o abre para revisão quando ele existir." },
+  "unreadable-layout": { title: "Este layout de currículo ainda não é suportado", body: "O Estúdio lê currículos gerados pelos templates do career-ops. Abra o PDF pela página do relatório." },
+  "no-report": { title: "Relatório não encontrado", body: "Não há relatório de avaliação com este número." },
 };
 
-const STALE = "This CV was regenerated in another tab. Reload the Studio.";
-const SAVE_ERRORS: Record<string, string> = { stale: STALE, busy: "This CV is already being saved. Wait for that save to finish." };
+const STALE = "Este currículo foi regerado em outra aba. Recarregue o Estúdio.";
+const SAVE_ERRORS: Record<string, string> = { stale: STALE, busy: "Este currículo já está sendo salvo. Espere esse salvamento terminar." };
 
 export function CvStudio({ n }: { n: string }) {
   const [load, setLoad] = useState<LoadState>({ kind: "loading" });
@@ -39,13 +39,13 @@ export function CvStudio({ n }: { n: string }) {
   return (
     <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6">
       <Link href={`/pipeline/${n}`} className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-brand-text">
-        <ArrowLeft className="size-4" /> Report #{n}
+        <ArrowLeft className="size-4" /> Relatório nº {n}
       </Link>
-      {load.kind === "loading" && <div className="mt-6 h-[70vh] animate-pulse rounded-2xl bg-muted/15" aria-label="Loading the CV Studio" />}
+      {load.kind === "loading" && <div className="mt-6 h-[70vh] animate-pulse rounded-2xl bg-muted/15" aria-label="Carregando o Estúdio de Currículo" />}
       {load.kind === "error" && (
         <div className="mt-8 max-w-xl rounded-2xl border border-border bg-surface/40 px-6 py-5">
-          <h1 className="font-display text-xl text-landing">{REASONS[load.reason]?.title ?? "The CV Studio could not open this CV"}</h1>
-          <p className="mt-2 text-sm text-muted">{REASONS[load.reason]?.body ?? "Reload the page to try again."}</p>
+          <h1 className="font-display text-xl text-landing">{REASONS[load.reason]?.title ?? "O Estúdio de Currículo não conseguiu abrir este currículo"}</h1>
+          <p className="mt-2 text-sm text-muted">{REASONS[load.reason]?.body ?? "Recarregue a página para tentar de novo."}</p>
         </div>
       )}
       {load.kind === "ready" && <Studio n={n} data={load.data} />}
@@ -82,8 +82,8 @@ function Studio({ n, data }: { n: string; data: Loaded }) {
     setSave((s) => (s.kind === "saved" ? { kind: "idle" } : s));
     const t = setTimeout(() => {
       send("PUT", { edits })
-        .then((r) => setAutosaveError(r.ok ? null : r.status === 409 ? STALE : "Autosave failed. Your latest changes are not saved yet."))
-        .catch(() => setAutosaveError("Autosave failed. Is the dashboard still running?"));
+        .then((r) => setAutosaveError(r.ok ? null : r.status === 409 ? STALE : "Falha no salvamento automático. Suas últimas alterações ainda não foram salvas."))
+        .catch(() => setAutosaveError("Falha no salvamento automático. O painel ainda está rodando?"));
     }, 500);
     return () => clearTimeout(t);
   }, [edits, send]);
@@ -93,9 +93,9 @@ function Studio({ n, data }: { n: string; data: Loaded }) {
     try {
       const r = await send("POST", { op: "save", edits });
       const body = (await r.json()) as { pdf?: string; indexed?: boolean; warnings?: string[]; error?: string };
-      setSave(r.ok && body.pdf ? { kind: "saved", pdf: body.pdf, indexed: body.indexed === true, warnings: body.warnings ?? [] } : { kind: "failed", error: SAVE_ERRORS[body.error ?? ""] ?? body.error ?? "Saving failed." });
+      setSave(r.ok && body.pdf ? { kind: "saved", pdf: body.pdf, indexed: body.indexed === true, warnings: body.warnings ?? [] } : { kind: "failed", error: SAVE_ERRORS[body.error ?? ""] ?? body.error ?? "O salvamento falhou." });
     } catch {
-      setSave({ kind: "failed", error: "Saving failed. Is the dashboard still running?" });
+      setSave({ kind: "failed", error: "O salvamento falhou. O painel ainda está rodando?" });
     }
   }, [edits, send]);
 
@@ -105,41 +105,41 @@ function Studio({ n, data }: { n: string; data: Loaded }) {
     <>
       <header className="mt-4 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">CV Studio</p>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-faint">Estúdio de Currículo</p>
           <h1 className="mt-1 font-display text-3xl tracking-tight text-landing">{data.company}</h1>
           <p className="mt-1 text-sm text-muted">
-            {changed} {changed === 1 ? "change" : "changes"} from your base CV. Review each one, then save the version you will send.
+            {changed} {changed === 1 ? "mudança" : "mudanças"} em relação ao seu currículo base. Revise cada uma, depois salve a versão que vai enviar.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Segmented label="Length" value={edits.preset.length} options={[["full", "Full"], ["one-page", "One page"]]} onChange={(v) => dispatch({ type: "preset", preset: { length: v as "full" | "one-page" } })} />
-          <Segmented label="Tone" value={edits.preset.tone} options={[["tailored", "Tailored"], ["conservative", "Conservative"]]} onChange={(v) => dispatch({ type: "preset", preset: { tone: v as "tailored" | "conservative" } })} />
+          <Segmented label="Tamanho" value={edits.preset.length} options={[["full", "Completo"], ["one-page", "Uma página"]]} onChange={(v) => dispatch({ type: "preset", preset: { length: v as "full" | "one-page" } })} />
+          <Segmented label="Tom" value={edits.preset.tone} options={[["tailored", "Adaptado"], ["conservative", "Conservador"]]} onChange={(v) => dispatch({ type: "preset", preset: { tone: v as "tailored" | "conservative" } })} />
           <button onClick={() => dispatch({ type: "reset" })} className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-brand/40 hover:text-brand-text">
-            <RotateCcw className="size-3.5" /> Reset
+            <RotateCcw className="size-3.5" /> Redefinir
           </button>
           <button
             onClick={saveForApply}
             disabled={save.kind === "saving"}
             className="inline-flex items-center gap-1.5 rounded-full bg-brand px-4 py-1.5 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
-            {save.kind === "saving" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} Save for apply
+            {save.kind === "saving" ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />} Salvar para candidatura
           </button>
         </div>
       </header>
 
-      {data.stale && <Notice tone="warn">This CV was regenerated since your last visit, so earlier edits were cleared.</Notice>}
-      {!data.hasBase && <Notice tone="warn">No cv.md found, so changes cannot be compared with your base CV.</Notice>}
+      {data.stale && <Notice tone="warn">Este currículo foi regerado desde sua última visita, então as edições anteriores foram limpas.</Notice>}
+      {!data.hasBase && <Notice tone="warn">Nenhum cv.md encontrado, então as mudanças não podem ser comparadas com seu currículo base.</Notice>}
       {save.kind === "saved" && (
         <Notice tone={save.indexed ? "ok" : "warn"}>
           {save.indexed ? (
             <>
-              Saved. Apply now uploads this version.{" "}
+              Salvo. A candidatura agora envia esta versão.{" "}
               <a href={`/api/cv-pdf?n=${encodeURIComponent(data.reportNum)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium underline">
-                <FileText className="size-3.5" /> Open {save.pdf}
+                <FileText className="size-3.5" /> Abrir {save.pdf}
               </a>
             </>
           ) : (
-            <>Saved {save.pdf}, but data/pdf-index.tsv was not updated, so Apply still uploads the earlier PDF.</>
+            <>Salvo {save.pdf}, mas data/pdf-index.tsv não foi atualizado, então a candidatura ainda envia o PDF anterior.</>
           )}
           {save.warnings.filter((w) => !/cv-facts\.json/.test(w)).map((w) => (
             <span key={w} className="mt-1 block text-xs opacity-80">{w}</span>

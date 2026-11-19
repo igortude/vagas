@@ -32,7 +32,7 @@ export async function saveStatus(n, current, next, request = fetch) {
   });
   const result = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(typeof result?.error === "string" ? result.error : "Could not save status. Please try again.");
+    throw new Error(typeof result?.error === "string" ? result.error : "Não foi possível salvar o status. Tente de novo.");
   }
   // Inputs come from the canonical dropdown; the endpoint echoes that label.
   if (result?.ok !== true || result.status !== next) {

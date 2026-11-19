@@ -22,15 +22,15 @@ export const maxDuration = 320;
 // page AND written to <root>/.career-ops-web/apply-prefill.log for debugging.
 export async function POST(req: Request) {
   const body = await readJsonObject<{ sessionId?: string; cliId?: string; company?: string; application?: string }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const { sessionId, cliId: requestedCliId, company, application } = body;
   // Same two identifiers the fill route takes, validated the same way: they
   // reach a filesystem resolver, so a non-string is refused before it gets there.
   if (company !== undefined && typeof company !== "string") {
-    return Response.json({ error: "company must be a string" }, { status: 400 });
+    return Response.json({ error: "O nome da empresa deve ser um texto" }, { status: 400 });
   }
   if (application !== undefined && typeof application !== "string") {
-    return Response.json({ error: "application must be a string" }, { status: 400 });
+    return Response.json({ error: "A candidatura deve ser um texto" }, { status: 400 });
   }
   const t0 = Date.now();
   const encoder = new TextEncoder();
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
       }
 
       const s = sessionId ? getSession(sessionId) : undefined;
-      if (!s) return fail("apply session not found (it may have expired)");
+      if (!s) return fail("Sessão de candidatura não encontrada (pode ter expirado)");
       const resolved = requestedCliId ? resolveCliOrFallback(requestedCliId) : null;
       if (!resolved) return fail(cliUnavailableError(requestedCliId ?? "").error);
       const { spec, binPath } = resolved;

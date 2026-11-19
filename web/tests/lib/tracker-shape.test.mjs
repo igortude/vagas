@@ -32,21 +32,21 @@ test("classifyTracker separates missing, empty, and malformed files", () => {
 test("trackerEmptyMessage does not blame the search when the file has no rows", () => {
   const filtered = trackerEmptyMessage({ shape: "rows", query: "Northwind", min: null, tab: "ALL" });
   assert.equal(filtered.kind, "filtered");
-  assert.match(filtered.detail, /clear the search/);
+  assert.match(filtered.detail, /Tente outra aba ou limpe a busca./);
 
   const empty = trackerEmptyMessage({ shape: "empty", query: "", min: null, tab: "ALL" });
   assert.equal(empty.kind, "empty");
-  assert.equal(empty.title, "No applications yet");
-  assert.doesNotMatch(empty.detail, /clear the search/);
+  assert.equal(empty.title, "Nenhuma candidatura ainda");
+  assert.doesNotMatch(empty.detail, /Tente outra aba ou limpe a busca./);
 
   const missing = trackerEmptyMessage({ shape: "missing", query: "", min: null, tab: "ALL" });
   assert.equal(missing.kind, "empty");
 
   const bad = trackerEmptyMessage({ shape: "malformed", query: "", min: null, tab: "ALL" });
   assert.equal(bad.kind, "malformed");
-  assert.match(bad.detail, /not a tracker table/);
-  assert.match(bad.detail, /not changed/);
-  assert.doesNotMatch(bad.detail, /clear the search/);
+  assert.match(bad.detail, /tracker/);
+  assert.match(bad.detail, /O arquivo não foi alterado./);
+  assert.doesNotMatch(bad.detail, /Tente outra aba ou limpe a busca./);
 
   const tab = trackerEmptyMessage({ shape: "rows", query: "", min: null, tab: "APPLIED" });
   assert.equal(tab.kind, "filtered");

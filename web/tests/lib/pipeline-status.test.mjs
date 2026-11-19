@@ -65,7 +65,7 @@ for (const code of [400, 404, 409, 503, 504]) {
 }
 
 test("non-JSON error and network failure remain failures", async () => {
-  await assert.rejects(saveStatus("11", "Evaluated", "Applied", async () => new Response("unavailable", { status: 503 })), /Could not save/);
+  await assert.rejects(saveStatus("11", "Evaluated", "Applied", async () => new Response("unavailable", { status: 503 })), /Não foi possível salvar/);
   await assert.rejects(saveStatus("11", "Evaluated", "Applied", async () => { throw new Error("offline"); }), /offline/);
 });
 

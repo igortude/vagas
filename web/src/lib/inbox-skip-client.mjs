@@ -37,7 +37,7 @@ export function queueInboxSkip(chains, url, done, request = fetch) {
     });
     const result = await response.json().catch(() => null);
     if (!response.ok) {
-      throw new Error(typeof result?.error === "string" ? result.error : "Could not save the inbox change. Please try again.");
+      throw new Error(typeof result?.error === "string" ? result.error : "Não foi possível salvar a mudança na caixa de entrada. Tente de novo.");
     }
     if (result?.ok !== true || result.done !== done) {
       throw new Error("Could not confirm the inbox change. Please try again.");

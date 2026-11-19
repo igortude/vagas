@@ -44,14 +44,14 @@ function rethrowBusy(error: unknown): never {
 
 export async function POST(req: Request) {
   const body = await readJsonObject<{ appNum?: string | number; date?: string }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const appNum = parseFollowupId(body.appNum);
   if (appNum === null) {
-    return Response.json({ error: "appNum (application #) required" }, { status: 400 });
+    return Response.json({ error: "Informe o número da candidatura (appNum)" }, { status: 400 });
   }
   const date = (body.date ?? "").trim();
   if (!isRealISODate(date)) {
-    return Response.json({ error: "date must be a real calendar date (YYYY-MM-DD)" }, { status: 400 });
+    return Response.json({ error: "A data deve existir no calendário (AAAA-MM-DD)" }, { status: 400 });
   }
 
   const file = followupsLogPath();
@@ -66,20 +66,20 @@ export async function POST(req: Request) {
       return Response.json({ ok: true, appNum, date });
     });
   } catch (e) {
-    return followupsWriteError(e, "write failed");
+    return followupsWriteError(e, "Falha ao salvar");
   }
 }
 
 export async function DELETE(req: Request) {
   const body = await readJsonObject<{ appNum?: string | number }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const appNum = parseFollowupId(body.appNum);
   if (appNum === null) {
-    return Response.json({ error: "appNum (application #) required" }, { status: 400 });
+    return Response.json({ error: "Informe o número da candidatura (appNum)" }, { status: 400 });
   }
 
   const file = followupsLogPath();
-  if (!fs.existsSync(file)) return Response.json({ error: "no follow-up log" }, { status: 404 });
+  if (!fs.existsSync(file)) return Response.json({ error: "Nenhum registro de acompanhamento encontrado" }, { status: 404 });
   try {
     return await withLogLock(async () => {
       const { clearNextPin } = await pinApi();
@@ -90,11 +90,11 @@ export async function DELETE(req: Request) {
         rethrowBusy(error);
       }
       if (!cleared) {
-        return Response.json({ error: `no pinned next-date for application #${appNum}` }, { status: 404 });
+        return Response.json({ error: `Nenhuma próxima data fixada para a candidatura nº ${appNum}` }, { status: 404 });
       }
       return Response.json({ ok: true, appNum });
     });
   } catch (e) {
-    return followupsWriteError(e, "delete failed");
+    return followupsWriteError(e, "Falha na exclusão");
   }
 }

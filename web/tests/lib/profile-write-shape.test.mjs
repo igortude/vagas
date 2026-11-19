@@ -77,7 +77,13 @@ for (const route of routes) {
         const beforeFiles = readdirSync(config).sort();
         const response = await route.post(request(route));
         assert.equal(response.status, 409);
-        assert.match((await response.json()).error, /refusing to overwrite/i);
+        const malformed = shape === "empty document" || shape === "malformed YAML";
+        const expectedError = malformed
+          ? route.name === "profile"
+            ? "config/profile.yml existe, mas não contém YAML válido — o arquivo não será sobrescrito."
+            : "config/profile.yml existe, mas não pôde ser lido como YAML — o arquivo não será sobrescrito."
+          : "config/profile.yml deve conter configurações nomeadas, não uma lista ou valor único. O arquivo não será sobrescrito.";
+        assert.equal((await response.json()).error, expectedError);
         assert.equal(readFileSync(file, "utf8"), source);
         assert.deepEqual(readdirSync(config).sort(), beforeFiles, "no backup or temp files on rejection");
       });

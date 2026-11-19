@@ -15,11 +15,11 @@ export type RowScore = { score: number | null; tone: "good" | "warn" | "bad" | "
 
 function agoLabel(age: number | null): string | null {
   if (age == null) return null;
-  if (age <= 0) return "today";
-  if (age === 1) return "yesterday";
-  if (age < 7) return `${age}d ago`;
-  if (age < 30) return `${Math.floor(age / 7)}w ago`;
-  return `${Math.floor(age / 30)}mo ago`;
+  if (age <= 0) return "hoje";
+  if (age === 1) return "ontem";
+  if (age < 7) return `há ${age} dias`;
+  if (age < 30) return `há ${Math.floor(age / 7)} semanas`;
+  return `há ${Math.floor(age / 30)} meses`;
 }
 
 // One raw posting in the triage list. Shows ONLY cheap, free signals + an honest
@@ -70,7 +70,7 @@ export function TriageRow({
         type="checkbox"
         checked={selected}
         onChange={onToggleSelect}
-        aria-label={`Select ${job.company} ${job.role}`}
+        aria-label={`Selecionar ${job.company} ${job.role}`}
         className="size-4 shrink-0 accent-brand max-sm:min-h-[44px] max-sm:min-w-[24px]"
       />
 
@@ -91,7 +91,7 @@ export function TriageRow({
           {source && <span className="rounded bg-surface-hover px-1 py-px font-medium text-muted">{ATS_LABEL[source]}</span>}
           {ago && <span>{ago}</span>}
           {/* 🔴 CRUDA: honest "not scored" — no fabricated match%. */}
-          {!evaluated && <span className="italic text-muted">not scored</span>}
+          {!evaluated && <span className="italic text-muted">sem nota</span>}
         </p>
       </div>
 
@@ -101,12 +101,12 @@ export function TriageRow({
           {scored!.running ? (
             <>
               <Loader2 className="size-3.5 animate-spin text-brand-text" />
-              <span className="text-brand-text max-sm:hidden">Scoring…</span>
+              <span className="text-brand-text max-sm:hidden">Pontuando…</span>
             </>
           ) : target.showScore ? (
             <Badge tone={scored!.tone}>{scored!.score}/5</Badge>
           ) : (
-            <span className="text-brand-text">Report</span>
+            <span className="text-brand-text">Relatório</span>
           )}
         </Link>
       ) : (
@@ -114,7 +114,7 @@ export function TriageRow({
           <button
             type="button"
             onClick={onSave}
-            title={shortlisted ? "In your shortlist" : "Save to shortlist"}
+            title={shortlisted ? "Na sua lista" : "Salvar na lista"}
             aria-pressed={shortlisted}
             className={cn(
               "inline-flex items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors max-sm:min-h-[44px] max-sm:min-w-[44px]",
@@ -122,12 +122,12 @@ export function TriageRow({
             )}
           >
             {shortlisted ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
-            <span className="max-sm:hidden">{shortlisted ? "Saved" : "Save"}</span>
+            <span className="max-sm:hidden">{shortlisted ? "Salvo" : "Salvar"}</span>
           </button>
           <button
             type="button"
             onClick={onSkip}
-            title="Skip — hide from the inbox"
+            title="Pular — ocultar da caixa de entrada"
             className="inline-flex items-center justify-center rounded-md p-1 text-faint transition-colors hover:bg-surface-hover hover:text-foreground max-sm:min-h-[44px] max-sm:min-w-[44px]"
           >
             <X className="size-4" />

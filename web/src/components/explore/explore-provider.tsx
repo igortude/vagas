@@ -193,7 +193,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
     setPartial(false);
     setError("");
     setScannerMissing(false);
-    setStatus("Casting the net across the ATS network…");
+    setStatus("Lançando a rede pela rede de ATS…");
     const init: Partial<Record<DiscoverySource, SourceState>> = {};
     for (const a of employer ? f.employers ?? [] : f.ats) init[a] = { state: "queued" };
     setSources(init);
@@ -216,7 +216,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
       switch (ev.kind) {
         case "atsStart":
           setPhase("scanning");
-          setStatus(`Walking ${ATS_LABEL[ev.ats as AtsSource] ?? ev.ats} — ${ev.companies.toLocaleString()} companies`);
+          setStatus(`Percorrendo ${ATS_LABEL[ev.ats as AtsSource] ?? ev.ats} — ${ev.companies.toLocaleString("pt-BR")} empresas`);
           setSources((s) => ({ ...s, [ev.ats]: { ...s[ev.ats as AtsSource], state: "active", companies: ev.companies } }));
           break;
         case "progress":
@@ -280,16 +280,16 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
           typeof msg === "string" && msg
             ? msg
             : sawScannerMissing
-              ? "The scanner isn't available."
-              : `Discovery failed (${status}).`;
+              ? "O scanner não está disponível."
+              : `A descoberta falhou (${status}).`;
       }
     } catch (e) {
       aborted = isAbortError(e);
       sawError = aborted
-        ? "Discover was interrupted before it finished. Run it again."
+        ? "A descoberta foi interrompida antes de terminar. Rode novamente."
         : e instanceof Error
           ? e.message
-          : "stream error";
+          : "erro no fluxo de resposta";
     }
 
     // The run has settled, so the URL can carry the search again (shareable, and
@@ -300,7 +300,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
     if (employer) {
       runningRef.current = false;
       // A missing terminal summary is interruption, even with zero results.
-      const outcome: EmployerScanOutcome = employerResult ?? { state: acc.length ? "partial" : "failed", message: `Incomplete scan — ${(f.employers ?? []).map(id => EMPLOYER_LABEL[id]).join(", ")}: ${sawError || "source stream ended before completion"}.` };
+      const outcome: EmployerScanOutcome = employerResult ?? { state: acc.length ? "partial" : "failed", message: `Varredura incompleta — ${(f.employers ?? []).map(id => EMPLOYER_LABEL[id]).join(", ")}: ${sawError || "o fluxo de origem terminou antes de concluir"}.` };
       setEmployerOutcome(outcome);
       setStatus("");
       setPartial(outcome.state !== "complete");
@@ -356,7 +356,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
     const run = runs.current.start();
     runningRef.current = true;
     setPhase("casting");
-    setStatus("Loading fresh matches…");
+    setStatus("Carregando vagas novas…");
     setEmployerOutcome(null);
     setOffers([]);
     setMatchCount(0);
@@ -381,7 +381,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
       const d = await r.json().catch(() => null);
       if (!runs.current.owns(run)) return;
       if (!d || !Array.isArray(d.offers)) {
-        setError("Couldn't load fresh matches — unexpected response.");
+        setError("Não foi possível carregar as vagas novas — resposta inesperada.");
         setPhase("failed");
         return;
       }
@@ -392,7 +392,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
       setPhase(list.length > 0 ? "results" : "empty-current");
     } catch (e) {
       if (!runs.current.owns(run)) return;
-      setError(e instanceof Error ? e.message : "Couldn't load fresh matches.");
+      setError(e instanceof Error ? e.message : "Não foi possível carregar as vagas novas.");
       setPhase("failed");
     } finally {
       if (runs.current.owns(run)) runningRef.current = false;
@@ -487,7 +487,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
     setAiCost({ searches: 0, candidates: 0, fetches: 0 });
     setError("");
     setScannerMissing(false);
-    setStatus("Casting across the open web…");
+    setStatus("Lançando pela web aberta…");
     // Same as the scan path: do not replaceState while /api/explore/ai is in
     // flight. The URL is written once the hunt has settled.
 
@@ -541,9 +541,9 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
         sawScannerMissing = isScannerMissing(d);
-        sawError = d.error || (sawScannerMissing ? "AI search isn't available." : `AI search failed (${r.status}).`);
+        sawError = d.error || (sawScannerMissing ? "A busca com IA não está disponível." : `A busca com IA falhou (${r.status}).`);
       } else if (!r.body) {
-        sawError = "No response stream.";
+        sawError = "Sem fluxo de resposta.";
       } else {
         const reader = r.body.getReader();
         const dec = new TextDecoder();
@@ -556,7 +556,7 @@ export function ExploreProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (e) {
       aborted = isAbortError(e);
-      if (!aborted) sawError = e instanceof Error ? e.message : "stream error";
+      if (!aborted) sawError = e instanceof Error ? e.message : "erro no fluxo de resposta";
     }
 
     if (!runs.current.owns(run)) return;

@@ -12,14 +12,14 @@ export const maxDuration = 120;
 // so the HUMAN reviews and submits. NEVER submits — there is no submit path here.
 export async function POST(req: Request) {
   const body = await readJsonObject<{ sessionId?: string; answers?: Record<string, string>; fields?: ApplyField[]; handoff?: boolean; company?: string; application?: string }>(req);
-  if (!body) return Response.json({ error: "bad json" }, { status: 400 });
+  if (!body) return Response.json({ error: "JSON inválido" }, { status: 400 });
   const { sessionId, answers = {}, fields = [], handoff, company, application } = body;
-  if (!sessionId) return Response.json({ error: "sessionId required" }, { status: 400 });
+  if (!sessionId) return Response.json({ error: "Informe o identificador da sessão" }, { status: 400 });
   if (company !== undefined && typeof company !== "string") {
-    return Response.json({ error: "company must be a string" }, { status: 400 });
+    return Response.json({ error: "O nome da empresa deve ser um texto" }, { status: 400 });
   }
   if (application !== undefined && typeof application !== "string") {
-    return Response.json({ error: "application must be a string" }, { status: 400 });
+    return Response.json({ error: "A candidatura deve ser um texto" }, { status: 400 });
   }
 
   // Resolve the tailored CV server-side (never trust a client path): by the
@@ -32,6 +32,6 @@ export async function POST(req: Request) {
     if (handoff) await handoffSession(sessionId).catch(() => {});
     return Response.json({ ...result, handedOff: !!handoff, cvAttached: !!cvPath });
   } catch (e) {
-    return Response.json({ error: e instanceof Error ? e.message.slice(0, 200) : "fill failed" }, { status: 500 });
+    return Response.json({ error: e instanceof Error ? e.message.slice(0, 200) : "Falha ao preencher o formulário" }, { status: 500 });
   }
 }

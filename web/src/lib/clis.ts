@@ -68,6 +68,7 @@ export const KNOWN: CliSpec[] = [
   { id: "copilot", name: "GitHub Copilot CLI", bin: "copilot", run: "copilot -p", url: "https://docs.github.com/en/copilot/github-copilot-in-the-cli", args: (p) => ["-p", p] },
   { id: "qwen", name: "Qwen CLI", bin: "qwen", run: "qwen -p", url: "https://qwen.ai/qwencode", args: (p) => ["-p", p] },
   { id: "antigravity", name: "Antigravity CLI", bin: "agy", run: "agy -p", url: "https://antigravity.google", args: (p) => ["-p", p] },
+  { id: "ollama", name: "Ollama (Modelos Locais)", bin: "ollama-cli.mjs", run: "ollama run", url: "https://ollama.com", args: (p) => ["-p", p] },
   // Grok Build speaks its own `--output-format streaming-json` schema, not
   // Claude's `stream-json`. It has a parser of its own now, so it streams
   // structured like the other two rather than falling through to raw stdout —
@@ -78,7 +79,9 @@ export const KNOWN: CliSpec[] = [
 
 function searchDirs(): string[] {
   const home = os.homedir();
+  const root = careerOpsRoot();
   const extra = [
+    root, // allows detecting local repository adapters like ollama-cli.mjs
     path.join(home, ".local/bin"),
     path.join(home, ".grok/bin"), // Grok Build CLI
     path.join(home, ".npm-global/bin"),

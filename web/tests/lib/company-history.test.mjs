@@ -30,8 +30,8 @@ test("reposts-detected is a finding, not an unrecognised label", () => {
   const m = companyCardModel(card({ postingChurn: { label: "reposts-detected", clusters: [{ title: "Platform Lead" }] } }));
   assert.equal(m.churn.kind, "finding");
   assert.equal(isConclusion(m.churn), true);
-  assert.match(m.churn.headline, /re-listed/i);
-  assert.doesNotMatch(m.churn.headline, /not evaluated/i);
+  assert.equal(m.churn.headline, "Esta empresa republicou vagas");
+  assert.doesNotMatch(m.churn.headline, /não avaliado/i);
 });
 
 test("every churn label the core emits is mapped", () => {
@@ -45,7 +45,7 @@ test("every churn label the core emits is mapped", () => {
   ]) {
     const m = companyCardModel(card({ postingChurn: { label, clusters: [] } }));
     assert.equal(m.churn.kind, kind, label);
-    assert.doesNotMatch(m.churn.headline, /not evaluated/i, `${label} must not read as unrecognised`);
+    assert.doesNotMatch(m.churn.headline, /não avaliado/i, `${label} must not read as unrecognised`);
   }
 });
 
@@ -55,13 +55,13 @@ test("a silent fact renders its own fields, not an empty outcome", () => {
   // first pair gave "#4 · —" with no date.
   const silent = factLine({ num: 4, appliedDate: "2026-07-02", status: "Applied", silentDays: 61, followupsSent: 2 });
   assert.match(silent, /#4/);
-  assert.match(silent, /no reply in 61 days/);
-  assert.match(silent, /applied 2026-07-02/);
-  assert.match(silent, /2 follow-ups sent/);
+  assert.match(silent, /sem resposta há 61 dias/);
+  assert.match(silent, /enviada em 2026-07-02/);
+  assert.match(silent, /2 follow-ups enviados/);
   assert.doesNotMatch(silent, /—|undefined|NaN/);
 
   // One follow-up is singular; zero is not mentioned at all.
-  assert.match(factLine({ num: 5, silentDays: 30, followupsSent: 1 }), /1 follow-up sent/);
+  assert.match(factLine({ num: 5, silentDays: 30, followupsSent: 1 }), /1 follow-up enviado/);
   assert.doesNotMatch(factLine({ num: 5, silentDays: 30, followupsSent: 0 }), /follow-up/);
 
   // The responded shape still reads the way it did.
@@ -69,8 +69,8 @@ test("a silent fact renders its own fields, not an empty outcome", () => {
   assert.equal(responded, "#2 · Interview · 2026-09-03");
 
   // stale is appended to either shape.
-  assert.match(factLine({ num: 9, silentDays: 400, stale: true }), /stale$/);
-  assert.match(factLine({ num: 9, outcome: "Applied", date: "2025-01-01", stale: true }), /stale$/);
+  assert.match(factLine({ num: 9, silentDays: 400, stale: true }), /desatualizado$/);
+  assert.match(factLine({ num: 9, outcome: "Applied", date: "2025-01-01", stale: true }), /desatualizado$/);
 
   // A fact with nothing but its own number is dropped rather than rendered as
   // punctuation.
@@ -84,15 +84,15 @@ test("a checked-and-empty result is a conclusion; an unchecked one is not", () =
   const checked = companyCardModel(card({ postingChurn: { label: "none-detected", clusters: [] } }));
   assert.equal(checked.churn.kind, "absence");
   assert.equal(isConclusion(checked.churn), true);
-  assert.match(checked.churn.headline, /No repeat postings found/);
+  assert.equal(checked.churn.headline, "Nenhum anúncio repetido encontrado");
 
   for (const label of ["no-scan-data", "aggregator-not-evaluated"]) {
     const unchecked = companyCardModel(card({ postingChurn: { label, clusters: [] } }));
     assert.equal(unchecked.churn.kind, "not-checked", label);
     assert.equal(isConclusion(unchecked.churn), false, label);
     // The headline must not read as a finding about the company.
-    assert.doesNotMatch(unchecked.churn.headline, /no repeat postings found/i, label);
-    assert.match(unchecked.churn.headline, /not checked/i, label);
+    assert.notEqual(unchecked.churn.headline, checked.churn.headline, label);
+    assert.equal(unchecked.churn.headline, label === "no-scan-data" ? "Anúncios repetidos não verificados" : "Repeat postings not checked", label);
   }
 });
 
@@ -167,14 +167,14 @@ test("an unread tracker is not checked; a read empty tracker remains absence", (
 test("company-wide churn does not claim that the report's role was reposted", () => {
   for (const label of ["reposts-detected", "none-detected"]) {
     const m = companyCardModel(card({ postingChurn: { label, clusters: [{ role: "Sales Manager" }] } }));
-    assert.doesNotMatch(m.churn.headline + m.churn.detail, /this role|same posting|role is not really open/i);
-    if (label === "reposts-detected") assert.match(m.churn.headline, /company/i);
+    assert.doesNotMatch(m.churn.headline + m.churn.detail, /esta vaga|mesmo anúncio|vaga não está aberta/i);
+    if (label === "reposts-detected") assert.match(m.churn.headline, /empresa/i);
   }
 });
 
 test("an evaluation fallback date is not a confirmed application date", () => {
   const fact = { num: 1, appliedDate: "2026-08-01", silentDays: 42, dateBasis: "evaluation-date" };
-  assert.match(factLine(fact), /evaluated 2026-08-01/);
-  assert.doesNotMatch(factLine(fact), /applied 2026-08-01|no reply in 42 days/);
-  for (const dateBasis of ["notes", "status-log"]) assert.match(factLine({ ...fact, dateBasis }), /applied 2026-08-01/);
+  assert.match(factLine(fact), /avaliada em 2026-08-01/);
+  assert.doesNotMatch(factLine(fact), /enviada em 2026-08-01|sem resposta há 42 dias/);
+  for (const dateBasis of ["notes", "status-log"]) assert.match(factLine({ ...fact, dateBasis }), /enviada em 2026-08-01/);
 });

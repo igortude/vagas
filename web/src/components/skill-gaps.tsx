@@ -16,6 +16,7 @@ import type { SkillGapModel } from "@/lib/skill-gaps.mjs";
 //
 // The weighting is the core's: a 2.1/5 report says more about a gap than a
 // 4.5/5 one, so a skill that sinks low-fit roles outranks one mentioned often.
+const TIER_LABELS: Record<string, string> = { High: "Alta", Medium: "Média", Low: "Baixa" };
 const TIER_CLASS: Record<string, string> = {
   High: "text-brand-text",
   Medium: "text-foreground",
@@ -74,8 +75,8 @@ export function SkillGaps() {
       <section className="mt-8 rounded-2xl border border-border bg-surface/40 px-5 py-4">
         <Header />
         <p className="mt-2 text-sm text-muted">
-          No recurring gaps yet. These are read from each report&apos;s Machine Summary and Gap table, so they appear
-          once a few evaluations are in.
+          Ainda não há lacunas recorrentes. Elas são identificadas no resumo técnico e na tabela de lacunas de cada relatório,
+          então aparecerão após algumas avaliações.
         </p>
         {/* The caveats belong here too. "No gaps" read off a CV whose skills
             could not be recognised, or off a fraction of the reports, is the
@@ -102,20 +103,20 @@ export function SkillGaps() {
               <div className="h-full rounded-full bg-brand/60" style={{ width: `${barPct(g, model.gaps)}%` }} />
             </div>
             <span className={`w-16 shrink-0 text-right text-xs tabular-nums ${TIER_CLASS[g.tier] ?? "text-muted"}`}>
-              {g.tier ?? "—"}
+              {g.tier ? (TIER_LABELS[g.tier] ?? g.tier) : "—"}
             </span>
             <span className="w-24 shrink-0 text-right text-xs tabular-nums text-faint">
-              {g.reports} report{g.reports === 1 ? "" : "s"}
+              {g.reports} relatório{g.reports === 1 ? "" : "s"}
             </span>
           </div>
         ))}
       </div>
 
       <p className="mt-4 text-xs text-faint">
-        Weighted by fit — a low-scoring role says more about a gap than a high-scoring one. Nothing here is added to your
-        CV; close the gap first, then write it.{" "}
+        Ponderado pela aderência — uma vaga de nota baixa diz mais sobre uma lacuna do que uma de nota alta. Nada aqui é adicionado ao seu
+        currículo; feche a lacuna primeiro, depois escreva.{" "}
         <Link href="/pipeline" className="text-muted underline-offset-2 hover:underline">
-          See the reports
+          Ver os relatórios
         </Link>
       </p>
 
@@ -128,8 +129,8 @@ function SkipBlockers({ blockers, skips }: { blockers: SkillGapModel["blockers"]
   if (blockers.length === 0) return null;
   return (
     <div className="mt-5 border-t border-border pt-4">
-      <h3 className="text-sm text-foreground">What blocked your last {skips} skips</h3>
-      <p className="mt-0.5 text-xs text-faint">Critical or high requirements the evaluator marked missing or partial.</p>
+      <h3 className="text-sm text-foreground">O que bloqueou suas últimas {skips} dispensas</h3>
+      <p className="mt-0.5 text-xs text-faint">Requisitos críticos ou altos que o avaliador marcou como ausentes ou parciais.</p>
       <ul className="mt-3 grid gap-3">
         {blockers.map((b) => {
           const { verdict, nudge } = blockerText(b);
@@ -138,7 +139,7 @@ function SkipBlockers({ blockers, skips }: { blockers: SkillGapModel["blockers"]
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="text-sm text-foreground">{b.label}</span>
                 <span className="text-xs tabular-nums text-brand-text">
-                  {b.skips} of {skips}
+                  {b.skips} de {skips}
                 </span>
                 <span className="text-xs text-muted">{verdict}</span>
                 <span className="ml-auto flex gap-2 text-xs tabular-nums text-faint">
@@ -176,8 +177,8 @@ function Header() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <GraduationCap className="size-4 text-brand-text" />
-      <h2 className="font-display text-base text-landing">What keeps costing you roles</h2>
-      <span className="text-xs text-faint">across your tracked evaluations</span>
+      <h2 className="font-display text-base text-landing">O que vem te custando vagas</h2>
+      <span className="text-xs text-faint">nas suas avaliações acompanhadas</span>
     </div>
   );
 }

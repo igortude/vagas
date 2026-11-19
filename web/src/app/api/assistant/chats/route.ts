@@ -5,14 +5,14 @@ import { MAX_CHAT_BYTES } from "@/lib/assistant-history.mjs";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 function failure(error: unknown) {
-  return Response.json({ error: error instanceof ChatError ? error.message : "Could not access conversation history" }, { status: error instanceof ChatError ? error.status : 500 });
+  return Response.json({ error: error instanceof ChatError ? error.message : "Não foi possível acessar o histórico de conversas" }, { status: error instanceof ChatError ? error.status : 500 });
 }
 export async function GET(req: Request) {
   try {
     const id = new URL(req.url).searchParams.get("id");
     if (!id) return Response.json(listChats(careerOpsRoot()));
     const chat = readChat(careerOpsRoot(), id);
-    return chat ? Response.json(chat) : Response.json({ error: "Conversation not found" }, { status: 404 });
+    return chat ? Response.json(chat) : Response.json({ error: "Conversa não encontrada" }, { status: 404 });
   } catch (error) { return failure(error); }
 }
 export async function PUT(req: Request) {

@@ -42,20 +42,20 @@ export function splitTiers(result) {
   return [
     {
       key: "covered",
-      label: "Covered",
-      hint: "mentioned more than once",
+      label: "Coberta",
+      hint: "mencionada mais de uma vez",
       terms: covered,
     },
     {
       key: "thin",
-      label: "Thin",
-      hint: "mentioned once — consider reinforcing",
+      label: "Fraca",
+      hint: "mencionada uma vez — considere reforçar",
       terms: thin,
     },
     {
       key: "missing",
-      label: "Missing",
-      hint: "not found in the CV",
+      label: "Ausente",
+      hint: "não encontrada no currículo",
       terms: missing,
     },
   ];
@@ -74,7 +74,7 @@ export function coverageModel(payload) {
   if (!payload?.available || !payload.result) {
     return {
       available: false,
-      reason: typeof payload?.reason === "string" ? payload.reason : "unavailable",
+      reason: typeof payload?.reason === "string" ? payload.reason : "indisponível",
       total: 0,
       presentCount: 0,
       coveragePct: null,

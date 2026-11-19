@@ -8,8 +8,8 @@ import { readFollowupsEnabled } from "@/lib/followups-server";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "career-ops — official web experience",
-  description: "The official, local-first web experience for career-ops.",
+  title: "career-ops — experiência web oficial",
+  description: "A experiência web oficial, local-first, do career-ops.",
   // Home-screen / standalone (iOS): let our theme-color flow up to the status bar
   // + Dynamic Island; safe-area insets handle the layout.
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "career-ops" },
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const followupsEnabled = readFollowupsEnabled();
   return (
     <html
-      lang="en"
+      lang="pt-BR"
       suppressHydrationWarning
       className={`${inter.variable} ${instrumentSerif.variable} ${instrumentSerifItalic.variable}`}
     >

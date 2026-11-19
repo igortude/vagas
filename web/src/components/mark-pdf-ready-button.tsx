@@ -34,13 +34,13 @@ export function MarkPdfReadyButton({
       });
       const body = await res.json().catch(() => null);
       if (!res.ok) {
-        setError(typeof body?.error === "string" ? body.error : "Could not mark the PDF ready.");
+        setError(typeof body?.error === "string" ? body.error : "Não foi possível marcar o PDF como pronto.");
         return;
       }
       setMarked(true);
       router.refresh();
     } catch {
-      setError("Could not mark the PDF ready.");
+      setError("Não foi possível marcar o PDF como pronto.");
     } finally {
       setBusy(false);
     }
@@ -59,7 +59,7 @@ export function MarkPdfReadyButton({
         }
       >
         {done && <Check className="size-3.5" />}
-        {busy ? "Saving…" : done ? "PDF ready" : "Mark PDF ready"}
+        {busy ? "Salvando…" : done ? "PDF pronto" : "Marcar PDF como pronto"}
       </button>
       {error && <span className="text-xs text-red-500">{error}</span>}
     </span>

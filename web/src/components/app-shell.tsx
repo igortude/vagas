@@ -30,7 +30,7 @@ export function AppShell({ children, followupsEnabled }: { children: React.React
         href="#main-content"
         className="sr-only rounded-md bg-brand text-sm font-medium text-brand-foreground focus:not-sr-only focus:fixed focus:px-3 focus:py-2 focus:left-3 focus:top-3 focus:z-[100] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50"
       >
-        Skip to content
+        Ir para o conteúdo
       </a>
       <MobileNav followupsEnabled={followupsEnabled} />
       <div className="flex min-h-screen">
@@ -73,8 +73,8 @@ export function AppShell({ children, followupsEnabled }: { children: React.React
             <UsageMeter />
             <div className="space-y-1.5">
               <div className="flex items-center justify-between px-1">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-faint">Appearance</span>
-                <span className="font-mono text-[10px] text-faint">THEME</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-faint">Aparência</span>
+                <span className="font-mono text-[10px] text-faint">TEMA</span>
               </div>
               <ThemeToggle showLabel />
               <div className="px-1">

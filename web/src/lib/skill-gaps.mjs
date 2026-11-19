@@ -58,8 +58,8 @@ export function skillGapModel(payload, limit = 8) {
     caveats.push({
       kind: "no-known-skills",
       text:
-        "No skills were recognised in your CV, so nothing could be subtracted as already-held — " +
-        "some of these are probably skills you already have.",
+        "Nenhuma habilidade foi reconhecida no seu currículo, então nada pôde ser subtraído como já existente — " +
+        "algumas destas provavelmente são habilidades que você já tem.",
     });
   }
 
@@ -80,8 +80,8 @@ export function skillGapModel(payload, limit = 8) {
       kind: "thin-coverage",
       text:
         withMs === 0
-          ? `None of the ${read} reports carry a Machine Summary — these come from Gap tables alone.`
-          : `Based on ${withMs} of ${read} reports — the rest carry no Machine Summary to read gaps from.`,
+          ? `Nenhum dos ${read} relatórios tem Machine Summary — estes vêm apenas das tabelas de lacunas.`
+          : `Baseado em ${withMs} de ${read} relatórios — os demais não têm Machine Summary para ler lacunas.`,
     });
   }
 
@@ -119,8 +119,8 @@ export function barPct(gap, all) {
 }
 
 const NUDGE = {
-  learn: "Your CV does not show this. Learn it, or aim at roles that do not ask for it.",
-  evidence: "Your CV shows some of this. If you have done more, add a bullet with the scope and the result.",
+  learn: "Seu currículo não mostra isto. Aprenda, ou mire em vagas que não pedem isso.",
+  evidence: "Seu currículo mostra parte disto. Se você fez mais, adicione um bullet com o escopo e o resultado.",
 };
 
 /**
@@ -131,10 +131,10 @@ const NUDGE = {
  */
 export function blockerText(b) {
   const parts = [];
-  if (b.missing === b.skips) parts.push(`missing in all ${b.skips}`);
-  else if (b.partial === b.skips) parts.push(`partial in all ${b.skips}`);
-  else parts.push(`missing in ${b.missing}, partial in ${b.partial}`);
-  if (b.closeCalls > 0) parts.push(`${b.closeCalls} scored 3.5 or higher`);
+  if (b.missing === b.skips) parts.push(`ausente em todas as ${b.skips}`);
+  else if (b.partial === b.skips) parts.push(`parcial em todas as ${b.skips}`);
+  else parts.push(`ausente em ${b.missing}, parcial em ${b.partial}`);
+  if (b.closeCalls > 0) parts.push(`${b.closeCalls} tiraram 3.5 ou mais`);
   return { verdict: parts.join(" · "), nudge: NUDGE[b.nudge] ?? NUDGE.learn };
 }
 

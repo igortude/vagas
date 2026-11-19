@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 // does not pass --force.
 export async function POST(req: Request) {
   const body = await readJsonObject<{ n?: unknown }>(req);
-  if (!body) return NextResponse.json({ error: "bad json" }, { status: 400 });
+  if (!body) return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   const n = digitArg(body.n);
   if (!n) {
-    return NextResponse.json({ error: "n must be a tracker row number" }, { status: 400 });
+    return NextResponse.json({ error: "O número deve corresponder a uma linha do tracker" }, { status: 400 });
   }
   return postCoreScript({
     script: "followup-seed",

@@ -26,14 +26,14 @@ test("a CV with no recognised skills is flagged, because the map still renders",
   assert.equal(m.gaps.length, 2, "the gaps are still shown");
   const c = m.caveats.find((x) => x.kind === "no-known-skills");
   assert.ok(c, "a zero known-skill count must be surfaced");
-  assert.match(c.text, /already have/);
+  assert.match(c.text, /habilidades que você já tem/);
 });
 
 test("a map drawn from a minority of reports says so", () => {
   const thin = skillGapModel(payload({ reportsRead: 9, reportsWithMachineSummary: 2 }));
   const c = thin.caveats.find((x) => x.kind === "thin-coverage");
   assert.ok(c);
-  assert.match(c.text, /2 of 9/);
+  assert.match(c.text, /2 de 9 relatórios/);
 
   // A majority needs no caveat — 5 of 9 is most of the pipeline.
   const ok = skillGapModel(payload({ reportsRead: 9, reportsWithMachineSummary: 5 }));
@@ -51,8 +51,8 @@ test("gaps from Gap tables alone are still flagged as thin", () => {
   assert.equal(m.gaps.length, 2, "the gaps are real and still shown");
   const c = m.caveats.find((x) => x.kind === "thin-coverage");
   assert.ok(c, "zero summaries with gaps present must be flagged");
-  assert.match(c.text, /None of the 9 reports/);
-  assert.doesNotMatch(c.text, /Based on 0 of 9/, "the zero case gets its own wording, not an odd ratio");
+  assert.match(c.text, /Nenhum dos 9 relatórios/);
+  assert.doesNotMatch(c.text, /Baseado em 0 de 9/, "the zero case gets its own wording, not an odd ratio");
 });
 
 test("an empty gap map is not flagged as thin", () => {
@@ -161,11 +161,11 @@ test("skip blockers pass through with the skip count, and malformed rows drop", 
 
 test("a blocker line names the verdict split, the close calls, and the matching nudge", () => {
   assert.deepEqual(blockerText({ label: "People management", skips: 9, missing: 9, partial: 0, closeCalls: 5, nudge: "learn", reports: [] }), {
-    verdict: "missing in all 9 · 5 scored 3.5 or higher",
-    nudge: "Your CV does not show this. Learn it, or aim at roles that do not ask for it.",
+    verdict: "ausente em todas as 9 · 5 tiraram 3.5 ou mais",
+    nudge: "Seu currículo não mostra isto. Aprenda, ou mire em vagas que não pedem isso.",
   });
   assert.deepEqual(blockerText({ label: "Kubernetes", skips: 3, missing: 1, partial: 2, closeCalls: 0, nudge: "evidence", reports: [] }), {
-    verdict: "missing in 1, partial in 2",
-    nudge: "Your CV shows some of this. If you have done more, add a bullet with the scope and the result.",
+    verdict: "ausente em 1, parcial em 2",
+    nudge: "Seu currículo mostra parte disto. Se você fez mais, adicione um bullet com o escopo e o resultado.",
   });
 });

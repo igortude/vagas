@@ -14,8 +14,8 @@ export function trackerEmptyMessage({ shape, query, min, tab }) {
   if (shape === "malformed") {
     return {
       kind: "malformed",
-      title: "Tracker file is not a table",
-      detail: "data/applications.md is not a tracker table. The file was not changed.",
+      title: "O arquivo do tracker não é uma tabela",
+      detail: "data/applications.md não é uma tabela de tracker. O arquivo não foi alterado.",
     };
   }
   const filtering = Boolean(String(query ?? "").trim())
@@ -24,13 +24,13 @@ export function trackerEmptyMessage({ shape, query, min, tab }) {
   if (shape === "rows" || filtering) {
     return {
       kind: "filtered",
-      title: "No matches",
-      detail: "Try a different tab or clear the search.",
+      title: "Nenhum resultado",
+      detail: "Tente outra aba ou limpe a busca.",
     };
   }
   return {
     kind: "empty",
-    title: "No applications yet",
-    detail: "Evaluated and added roles will show up here.",
+    title: "Nenhuma candidatura ainda",
+    detail: "Vagas avaliadas e adicionadas aparecerão aqui.",
   };
 }

@@ -1,6 +1,17 @@
 import { buildPipelineSankey, layoutSankey } from "@/lib/pipeline-sankey.mjs";
 import { cn } from "@/lib/cn";
 
+const SANKEY_LABELS: Record<string, string> = {
+  Tracked: "Acompanhadas", SKIP: "Ignoradas", "Still evaluated": "Ainda avaliadas",
+  "Other status": "Outros status", "Discarded (no application recorded)": "Descartadas (sem candidatura registrada)",
+  Submitted: "Enviadas", Waiting: "Aguardando", "Company engaged": "Empresa respondeu",
+  "Rejected (no interview)": "Rejeitadas (sem entrevista)", Discarded: "Descartadas",
+  Screening: "Triagem", Assessment: "Teste", Interview: "Entrevista", Offer: "Proposta",
+  Hired: "Contratadas", "Rejected after interview": "Rejeitadas após entrevista",
+  "Discarded after interview": "Descartadas após entrevista",
+};
+const displayLabel = (label: string) => SANKEY_LABELS[label] ?? label;
+
 const TONE_NODE: Record<string, string> = {
   success: "fill-emerald-500",
   danger: "fill-red-400",
@@ -41,11 +52,11 @@ export function PipelineSankey({
   return (
     <section id="pipeline-sankey" className="mt-10 scroll-mt-8" aria-labelledby="sankey-heading">
       <h2 id="sankey-heading" className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">
-        Pipeline Sankey
+        Fluxo do pipeline
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-muted">
-        Current tracker snapshot. Status-log transitions keep interview-then-reject
-        on the interview path — a later Rejected does not erase the stage.
+        Retrato atual do rastreador. O histórico de status mantém as vagas que chegaram à entrevista
+        nesse caminho — uma rejeição posterior não apaga a etapa.
       </p>
 
       <div className="mt-4 overflow-x-auto rounded-xl border border-border bg-surface/50 p-3">
@@ -55,10 +66,10 @@ export function PipelineSankey({
           role="img"
           aria-labelledby="sankey-title sankey-desc"
         >
-          <title id="sankey-title">Application pipeline Sankey</title>
+          <title id="sankey-title">Fluxo das candidaturas no pipeline</title>
           <desc id="sankey-desc">
-            {graph.total} tracked roles flowing from tracked through submitted to waiting,
-            company-engaged, and terminal outcomes.
+            {graph.total} vagas acompanhadas passando pelas etapas de candidatura enviada, espera,
+            contato da empresa e resultados finais.
           </desc>
 
           {layout.links.map((link) => {
@@ -67,7 +78,7 @@ export function PipelineSankey({
             const targetLabel = labelById.get(link.target) ?? link.target;
             return (
               <g key={`${link.source}-${link.target}`}>
-                <title>{`${link.value} roles: ${sourceLabel} → ${targetLabel}`}</title>
+                <title>{`${link.value} vagas: ${displayLabel(sourceLabel)} → ${displayLabel(targetLabel)}`}</title>
                 <path d={link.d} className={cn(TONE_LINK[tone] ?? TONE_LINK.neutral, "outline-none")} />
               </g>
             );
@@ -81,7 +92,7 @@ export function PipelineSankey({
             const anchor = labelOnRight ? "start" : "end";
             return (
               <g key={node.id}>
-                <title>{`${node.label}: ${node.value}`}</title>
+                <title>{`${displayLabel(node.label)}: ${node.value}`}</title>
                 <rect
                   x={node.x}
                   y={node.y}
@@ -100,7 +111,7 @@ export function PipelineSankey({
                   strokeWidth={4}
                   paintOrder="stroke"
                 >
-                  {node.label}
+                  {displayLabel(node.label)}
                   <tspan className="fill-muted font-normal" stroke="var(--bg)" strokeWidth={4} paintOrder="stroke">
                     {`  ${node.value}`}
                   </tspan>
@@ -113,19 +124,19 @@ export function PipelineSankey({
 
       <div className="sr-only">
         <table>
-          <caption>Pipeline Sankey flows</caption>
+          <caption>Fluxos do pipeline</caption>
           <thead>
             <tr>
-              <th>From</th>
-              <th>To</th>
-              <th>Roles</th>
+              <th>Origem</th>
+              <th>Destino</th>
+              <th>Vagas</th>
             </tr>
           </thead>
           <tbody>
             {graph.links.map((link) => (
               <tr key={`${link.source}-${link.target}`}>
-                <td>{labelById.get(link.source) ?? link.source}</td>
-                <td>{labelById.get(link.target) ?? link.target}</td>
+                <td>{displayLabel(labelById.get(link.source) ?? link.source)}</td>
+                <td>{displayLabel(labelById.get(link.target) ?? link.target)}</td>
                 <td>{link.value}</td>
               </tr>
             ))}

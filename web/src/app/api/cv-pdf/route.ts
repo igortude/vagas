@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
     // company-slug heuristic below, same as the "n" path.
   }
 
-  if (!company) return new Response("company required", { status: 400 });
+  if (!company) return new Response("Informe a empresa", { status: 400 });
   // Same invariant as the apply lookup: a company with no usable key serves
   // nothing rather than the newest unrelated CV (#2352).
   const key = companySlug(company);

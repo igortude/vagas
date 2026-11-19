@@ -24,12 +24,12 @@ const BAND_CLASS: Record<string, string> = {
 };
 
 const REASON_COPY: Record<string, string> = {
-  "no-keywords": "This report has no “Keywords extracted” block, so there is nothing to compare the CV against.",
-  "no-script": "keyword-match.mjs isn’t in this career-ops checkout.",
-  "no-report": "The report file couldn’t be found.",
-  failed: "The keyword check didn’t complete.",
-  unparseable: "The keyword check returned something unreadable.",
-  unavailable: "The keyword check isn’t available.",
+  "no-keywords": "Este relatório não tem o bloco “Palavras-chave extraídas”, então não há nada para comparar com o currículo.",
+  "no-script": "O keyword-match.mjs não está neste checkout do career-ops.",
+  "no-report": "O arquivo do relatório não foi encontrado.",
+  failed: "A checagem de palavras-chave não foi concluída.",
+  unparseable: "A checagem de palavras-chave retornou algo ilegível.",
+  unavailable: "A checagem de palavras-chave não está disponível.",
 };
 
 export function KeywordCoverage({ reportId }: { reportId: string }) {
@@ -78,7 +78,7 @@ export function KeywordCoverage({ reportId }: { reportId: string }) {
           {model.coveragePct === null ? "—" : `${model.coveragePct}%`}
         </span>
         <span className="text-sm text-muted">
-          {model.presentCount} of {model.total} JD keyword{model.total === 1 ? "" : "s"} found in your CV
+          {model.presentCount} de {model.total} palavra{model.total === 1 ? "" : "s"}-chave da vaga encontrada{model.total === 1 ? "" : "s"} no seu currículo
         </span>
       </div>
 
@@ -109,8 +109,8 @@ export function KeywordCoverage({ reportId }: { reportId: string }) {
       </div>
 
       <p className="mt-4 text-xs text-faint">
-        Diagnostic only — nothing here edits your CV. Reformulate what you genuinely have; never add a keyword you cannot
-        back up.
+        Apenas diagnóstico — nada aqui edita seu currículo. Reformule o que você realmente tem; nunca adicione uma palavra-chave que não possa
+        comprovar.
       </p>
     </section>
   );
@@ -120,8 +120,8 @@ function Header() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <ScanSearch className="size-4 text-brand-text" />
-      <h2 className="font-display text-base text-landing">ATS keyword coverage</h2>
-      <span className="text-xs text-faint">this JD vs your CV</span>
+      <h2 className="font-display text-base text-landing">Cobertura de palavras-chave ATS</h2>
+      <span className="text-xs text-faint">esta vaga vs seu currículo</span>
     </div>
   );
 }
