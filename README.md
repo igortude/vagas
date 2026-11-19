@@ -86,7 +86,14 @@ OLLAMA_MODEL=qwen2.5:7b node ollama-runner.mjs -p "Avalie esta vaga: https://...
 ```bash
 npm run scan     # procura vagas novas nos portais (zero tokens)
 npm run doctor   # verifica se a instalação está correta
+
+# vagas de estágio no LinkedIn, com filtro de modalidade
+node scan-linkedin.mjs --modalidade remoto
+node scan-linkedin.mjs --modalidade remoto,hibrido --query "estagio dados"
+node scan-linkedin.mjs --presencial          # atalhos: --remoto, --hibrido, --presencial
 ```
+
+Com `--modalidade`, cada vaga entra na pipeline com a modalidade junto da localização (ex.: `São Paulo, SP · Remoto`). Na tela **Pipeline**, digite `remoto`, `híbrido` ou `presencial` no campo **local…** para filtrar.
 
 Na primeira vez, o painel guia você para adicionar currículo, cargos-alvo, pretensão salarial e localização. Seus dados pessoais (`cv.md`, `config/profile.yml`, `portals.yml`, `data/`) ficam no seu computador e estão no `.gitignore`.
 
