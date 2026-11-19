@@ -70,8 +70,8 @@ Variáveis de ambiente opcionais:
 |---|---|---|
 | `OLLAMA_MODEL` | Modelo usado nas avaliações | `qwen2.5-coder-abliterated:7b` |
 | `OLLAMA_BASE_URL` | Endereço do servidor Ollama | `http://localhost:11434` |
-| `OLLAMA_NUM_CTX` | Tamanho do contexto, em tokens X
-| `OLLAMA_TIMEOUT_MS` | Tempo máximo de espera por resposta X
+| `OLLAMA_NUM_CTX` | Tamanho do contexto, em tokens | `32768` |
+| `OLLAMA_TIMEOUT_MS` | Tempo máximo de espera por resposta | `300000` (5 min) |
 
 Avaliação direto pelo terminal:
 
